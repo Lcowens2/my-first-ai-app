@@ -92,7 +92,7 @@ const renderNav = () => (
 <div className="w-8 h-8 gold-bg rounded-sm flex items-center justify-center">
 <span className="text-black font-bold text-xs">TS</span>
 </div>
-<h1 className="text-xl font-serif tracking-widest uppercase gold-text">L Owens Systems™</h1>
+st.header("L Owens Systems")
 </div>
 <div className="flex gap-8 items-center uppercase tracking-tighter text-xs font-semibold">
 <button onClick={() => setCurrentPage('home')} className={${currentPage === 'home' ? 'gold-text' : 'text-gray-400'} hover:gold-text transition-colors}>Home</button>
