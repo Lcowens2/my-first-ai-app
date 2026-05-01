@@ -5,90 +5,82 @@ from PIL import Image
 # 1. Page Config
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 
-# --- EDITORIAL LUXE CSS (Cream, Brown, Tan, Gold) ---
+# --- IMMERSIVE BRANDING CSS ---
 st.markdown("""
     <style>
-    /* 1. Layered Background (Cream & Tan Gradient) */
+    /* 1. Background with Watermark Logo Effect */
     .stApp {
-        background: radial-gradient(circle, #FFFDF9 0%, #F3E5D8 100%);
+        background: linear-gradient(rgba(255, 253, 249, 0.9), rgba(243, 229, 216, 0.9)), 
+                    url("app/static/logo.png"); /* This attempts to pull your logo as a background */
+        background-repeat: no-repeat;
+        background-position: center;
+        background-attachment: fixed;
+        background-size: 60%; /* Large but contained */
     }
 
-    /* 2. The Luxe Double Border Frame */
+    /* 2. Heavy Editorial Border (The Frame) */
     section.main > div {
-        border: 1px solid #D4AF37; /* Thin Gold Inner Line */
-        outline: 15px solid #5C4033; /* Thick Espresso Outer Frame */
-        border-radius: 5px;
-        padding: 60px;
-        margin: 30px;
-        background-color: #FFFDF9; /* Solid Cream Canvas */
-        box-shadow: 0px 20px 40px rgba(0,0,0,0.2);
+        border: 2px solid #D4AF37; /* Inner Gold */
+        outline: 25px solid #5C4033; /* Extra Thick Espresso Frame */
+        border-radius: 0px;
+        padding: 80px;
+        margin: 50px;
+        background-color: rgba(255, 253, 249, 0.85); /* Semi-transparent to let background logo show through */
+        box-shadow: 0px 30px 60px rgba(0,0,0,0.3);
     }
 
-    /* 3. High-End Typography */
-    /* Importing a Serif font for the Titles to look like a Magazine */
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400&display=swap');
+    /* 3. Typography Hierarchy */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
 
     .radiant-title {
         font-family: 'Playfair Display', serif;
-        font-size: 72px !important;
-        color: #5C4033 !important; /* Espresso */
+        font-size: 85px !important;
+        color: #5C4033 !important;
         line-height: 1 !important;
-        margin-bottom: 5px !important;
+        margin-bottom: 10px !important;
     }
     
     .systems-subtitle {
         font-family: 'Inter', sans-serif;
-        font-size: 20px !important;
-        color: #8B7355 !important; /* Muted Tan */
-        letter-spacing: 4px !important;
+        font-size: 24px !important;
+        color: #8B7355 !important;
+        letter-spacing: 6px !important;
         text-transform: uppercase;
-        margin-bottom: 0px !important;
+        margin-bottom: 5px !important;
     }
     
     .purpose-tagline {
         font-family: 'Inter', sans-serif;
-        font-size: 16px !important;
-        color: #D4AF37 !important; /* Gold */
+        font-size: 20px !important;
+        color: #D4AF37 !important;
         font-style: italic;
-        margin-top: 5px;
     }
 
-    /* 4. Labels and Inputs */
+    /* 4. Inputs & Modern Styling */
     label, p, .stSelectbox label {
         color: #5C4033 !important;
         font-family: 'Inter', sans-serif;
-        font-weight: 400;
+        font-weight: 600;
+        letter-spacing: 1px;
     }
 
-    /* 5. The Gold "Radiant" Button */
     .stButton>button {
-        background: linear-gradient(145deg, #D4AF37, #B8860B); /* Metallic Gold */
+        background: linear-gradient(145deg, #D4AF37, #B8860B);
         color: #FFFDF9 !important;
-        border-radius: 0px; /* Sharp, modern edges */
+        border-radius: 0px;
         border: 1px solid #5C4033;
-        padding: 15px 40px;
+        padding: 20px 60px;
         font-family: 'Inter', sans-serif;
-        letter-spacing: 2px;
+        font-size: 20px;
+        letter-spacing: 3px;
         text-transform: uppercase;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-    .stButton>button:hover {
-        background: #5C4033;
-        color: #D4AF37 !important;
-    }
-
-    /* Modernizing the Upload Box */
-    .stFileUploader {
-        border: 1px dashed #D4AF37;
-        background-color: #FAF6F1;
-        padding: 10px;
+        width: 100%;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Branding Header (Logo Top Right)
-col_title, col_logo = st.columns([3, 1])
+# 2. Header: Double Logo Presence
+col_title, col_logo = st.columns([2, 1])
 
 with col_title:
     st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
@@ -98,39 +90,45 @@ with col_title:
 with col_logo:
     try:
         logo = Image.open("logo.png")
-        st.image(logo, width=180)
+        st.image(logo, width=300) # Significantly larger logo in the corner
     except:
         st.write(" ") 
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# 3. App Content
+# 3. Step 1: Image & Quantity
 st.write("### I. IDENTITY LOCK")
-uploaded_file = st.file_uploader("UPLOAD BASE IMAGE", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+col_file, col_qty = st.columns([2, 1])
 
-st.markdown("<hr style='border-top: 1px solid #D4AF37;'>", unsafe_allow_html=True)
+with col_file:
+    uploaded_file = st.file_uploader("UPLOAD BASE IMAGE", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
 
+with col_qty:
+    # NEW: Photo output options
+    output_count = st.selectbox("NUMBER OF OUTPUTS", [1, 2, 4])
+
+st.markdown("<hr style='border-top: 2px solid #5C4033;'>", unsafe_allow_html=True)
+
+# 4. Step 2: Customization
 st.write("### II. EDITORIAL DIRECTION")
-custom_prompt = st.text_area("ADDITIONAL SPECIFICATIONS", placeholder="Enter custom details here...")
+custom_prompt = st.text_area("ADDITIONAL SPECIFICATIONS", placeholder="Detail your specific brand requirements...")
 
 col1, col2 = st.columns(2)
 
 with col1:
     style = st.selectbox("WARDROBE", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
-    shot_type = st.selectbox("COMPOSITION", ["Headshot", "Full Length", "Studio"])
-    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic"])
+    shot_type = st.selectbox("COMPOSITION", ["Headshot", "Full Length", "Editorial Studio"])
+    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
 
 with col2:
     makeup = st.selectbox("BEAUTY", ["Soft Glam", "Full Glam", "Natural Glow"])
     hair = st.selectbox("STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht"])
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht", "Penthouse View"])
 
-# 4. Action Button
+# 5. Execute
 st.markdown("<br>", unsafe_allow_html=True)
-c1, c2, c3 = st.columns([1,1,1])
-with c2:
-    if st.button("PRODUCE RADIANT IMAGE"):
-        if uploaded_file is not None:
-            st.success("AUTHENTICATED. PREPARING EDITORIAL OUTPUT.")
-        else:
-            st.warning("PLEASE UPLOAD BASE IMAGE.")
+if st.button("PRODUCE RADIANT ASSETS"):
+    if uploaded_file is not None:
+        st.success(f"AUTHENTICATED. GENERATING {output_count} PREMIUM ASSETS.")
+    else:
+        st.warning("PLEASE UPLOAD BASE IMAGE.")
