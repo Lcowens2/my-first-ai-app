@@ -5,131 +5,132 @@ from PIL import Image
 # 1. Page Config
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 
-# --- EDITORIAL CSS (Hierarchy, Border, Brown Palette) ---
+# --- EDITORIAL LUXE CSS (Cream, Brown, Tan, Gold) ---
 st.markdown("""
     <style>
-    /* 1. Main Background */
+    /* 1. Layered Background (Cream & Tan Gradient) */
     .stApp {
-        background: linear-gradient(180deg, #FFF5E1 0%, #FAE9D1 100%);
+        background: radial-gradient(circle, #FFFDF9 0%, #F3E5D8 100%);
     }
 
-    /* 2. The Brown Border Frame */
+    /* 2. The Luxe Double Border Frame */
     section.main > div {
-        border: 2px solid #8B4513; 
-        border-radius: 15px;
-        padding: 50px;
-        margin: 20px;
-        background-color: rgba(255, 255, 255, 0.15);
-        box-shadow: 0px 10px 30px rgba(139, 69, 19, 0.05);
+        border: 1px solid #D4AF37; /* Thin Gold Inner Line */
+        outline: 15px solid #5C4033; /* Thick Espresso Outer Frame */
+        border-radius: 5px;
+        padding: 60px;
+        margin: 30px;
+        background-color: #FFFDF9; /* Solid Cream Canvas */
+        box-shadow: 0px 20px 40px rgba(0,0,0,0.2);
     }
 
-    /* 3. Global Brown Typography */
-    html, body, [data-testid="stHeader"], p, h1, h2, h3, h4, li, .stSelectbox label, .stTextArea label {
-        color: #8B4513 !important; 
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
+    /* 3. High-End Typography */
+    /* Importing a Serif font for the Titles to look like a Magazine */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400&display=swap');
 
-    /* 4. Specific Hierarchy Scaling */
     .radiant-title {
-        font-size: 64px !important; /* The Largest Element */
-        font-weight: 700 !important;
-        line-height: 1.1 !important;
-        margin-bottom: 0px !important;
+        font-family: 'Playfair Display', serif;
+        font-size: 72px !important;
+        color: #5C4033 !important; /* Espresso */
+        line-height: 1 !important;
+        margin-bottom: 5px !important;
     }
     
     .systems-subtitle {
-        font-size: 22px !important; /* Medium/Supporting */
-        font-weight: 400 !important;
-        letter-spacing: 1px !important;
+        font-family: 'Inter', sans-serif;
+        font-size: 20px !important;
+        color: #8B7355 !important; /* Muted Tan */
+        letter-spacing: 4px !important;
+        text-transform: uppercase;
         margin-bottom: 0px !important;
     }
     
     .purpose-tagline {
-        font-size: 18px !important; /* Smallest/Elegant */
-        font-style: italic !important;
-        opacity: 0.8;
+        font-family: 'Inter', sans-serif;
+        font-size: 16px !important;
+        color: #D4AF37 !important; /* Gold */
+        font-style: italic;
+        margin-top: 5px;
     }
 
-    hr {
-        border-top: 1px solid #D2B48C !important;
+    /* 4. Labels and Inputs */
+    label, p, .stSelectbox label {
+        color: #5C4033 !important;
+        font-family: 'Inter', sans-serif;
+        font-weight: 400;
     }
 
-    /* 5. Modern Button Styling */
+    /* 5. The Gold "Radiant" Button */
     .stButton>button {
-        background-color: #8B4513; 
-        color: #FFF5E1 !important;
-        border-radius: 25px;
-        border: none;
-        padding: 12px 30px;
+        background: linear-gradient(145deg, #D4AF37, #B8860B); /* Metallic Gold */
+        color: #FFFDF9 !important;
+        border-radius: 0px; /* Sharp, modern edges */
+        border: 1px solid #5C4033;
+        padding: 15px 40px;
+        font-family: 'Inter', sans-serif;
+        letter-spacing: 2px;
+        text-transform: uppercase;
         font-weight: bold;
-        font-size: 18px;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        background: #5C4033;
+        color: #D4AF37 !important;
     }
 
-    /* Input cleaning */
-    .stSelectbox div[data-baseweb="select"], .stTextArea textarea {
-        background-color: rgba(255, 255, 255, 0.5);
-        border: 1px solid #D2B48C;
+    /* Modernizing the Upload Box */
+    .stFileUploader {
+        border: 1px dashed #D4AF37;
+        background-color: #FAF6F1;
+        padding: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Top Right Logo + Refined Typography Layout
+# 2. Branding Header (Logo Top Right)
 col_title, col_logo = st.columns([3, 1])
 
 with col_title:
-    # We use custom classes to control exact sizing
     st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
     st.markdown('<p class="systems-subtitle">L Owens Systems</p>', unsafe_allow_html=True)
     st.markdown('<p class="purpose-tagline">Rewired for Purpose</p>', unsafe_allow_html=True)
 
 with col_logo:
     try:
-        # Pulls 'logo.png' from your GitHub folder
         logo = Image.open("logo.png")
-        st.image(logo, use_column_width=True)
+        st.image(logo, width=180)
     except:
         st.write(" ") 
 
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-# 3. Secure API Connection
-try:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-except:
-    st.write(" ")
+# 3. App Content
+st.write("### I. IDENTITY LOCK")
+uploaded_file = st.file_uploader("UPLOAD BASE IMAGE", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
 
-# 4. Identity Lock Interface
-st.write("### STEP 1: Identity Lock")
-st.write("Upload your professional base photo")
-uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+st.markdown("<hr style='border-top: 1px solid #D4AF37;'>", unsafe_allow_html=True)
 
-st.markdown("---")
-st.write("### STEP 2: Editorial Customization")
+st.write("### II. EDITORIAL DIRECTION")
+custom_prompt = st.text_area("ADDITIONAL SPECIFICATIONS", placeholder="Enter custom details here...")
 
-custom_prompt = st.text_area("Custom Editorial Instructions (Optional)", 
-                             placeholder="Add specific brand details here...")
-
-st.write("#### Brand Vibe Selection")
 col1, col2 = st.columns(2)
 
 with col1:
-    style = st.selectbox("Clothing Aesthetic", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
-    shot_type = st.selectbox("Shot Composition", ["Headshot", "Full Length", "Freestyle", "Studio"])
-    lighting = st.selectbox("Lighting Environment", ["Golden Hour", "Studio Softbox", "Dramatic Cinematic", "Natural Daylight"])
+    style = st.selectbox("WARDROBE", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
+    shot_type = st.selectbox("COMPOSITION", ["Headshot", "Full Length", "Studio"])
+    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic"])
 
 with col2:
-    makeup = st.selectbox("Beauty Profile", ["Soft Glam", "Full Glam", "Natural Glow"])
-    hair = st.selectbox("Hair Presentation", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
-    theme = st.selectbox("Setting/Theme", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht", "Penthouse Office"])
+    makeup = st.selectbox("BEAUTY", ["Soft Glam", "Full Glam", "Natural Glow"])
+    hair = st.selectbox("STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht"])
 
-# 5. Launch Button
-st.markdown("---")
-c_left, c_mid, c_right = st.columns([1,1,1])
-with c_mid:
-    if st.button("Generate My Radiant Image"):
+# 4. Action Button
+st.markdown("<br>", unsafe_allow_html=True)
+c1, c2, c3 = st.columns([1,1,1])
+with c2:
+    if st.button("PRODUCE RADIANT IMAGE"):
         if uploaded_file is not None:
-            st.success("Identity Locked. Processing editorial excellence...")
+            st.success("AUTHENTICATED. PREPARING EDITORIAL OUTPUT.")
         else:
-            st.warning("Please upload a photo.")
+            st.warning("PLEASE UPLOAD BASE IMAGE.")
