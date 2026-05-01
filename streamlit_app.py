@@ -472,7 +472,7 @@ Code
       100% { transform: translateX(100%); }
     }
     .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
+      
     }
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #0B1020;
