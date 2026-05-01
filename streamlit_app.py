@@ -340,7 +340,7 @@ Code
       <div className="flex flex-col items-center justify-center h-[500px] text-gray-600">
         <i className="fas fa-images text-5xl mb-6 opacity-20"></i>
         <p className="font-serif text-xl italic mb-2">Your shoot results will appear here</p>
-        st.write(Studio Idle-Ready for command")
+        st.write("Studio Idle-Ready for command")
       </div>
     )}
   </div>
