@@ -42,14 +42,6 @@ st.markdown("---")
 
 # Rest of your code continues here...
 
-#### 3. Why this works for your Stan Store
-By injecting this "Style" code:
-*   **Trust:** Your customers will see your colors immediately, making it feel like a professional tool from **L Owens Systems**.
-*   **The "Glow":** The soft cream background reduces eye strain and makes the "Radiant" theme feel literal.
-*   **Editorial Quality:** It removes the standard "white and gray" internet look and gives you a bespoke, high-end studio feel.
-
-Once you commit this to GitHub, your app will instantly transform! Does this "Radiant" color scheme look exactly like what you had in mind for your brand?
-
 # 2. Secure API Connection (Using your vault key)
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
