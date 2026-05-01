@@ -2,11 +2,53 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-# 1. Official App Branding
+import streamlit as st
+import google.generativeai as genai
+from PIL import Image
+
+# 1. Page Config & CSS Branding
 st.set_page_config(page_title="Radiant Image AI", page_icon="✨")
-st.title("Radiant Image AI™")
+
+# --- CUSTOM COLORS & BACKGROUNDS ---
+st.markdown("""
+    <style>
+    /* Sets the main background to your brand's Cream color */
+    .stApp {
+        background-color: #FFF5E1; 
+    }
+    /* Sets the text and titles to Editorial Charcoal */
+    h1, h2, h3, p {
+        color: #1A1A1A !important;
+    }
+    /* Styles the buttons in your brand's Peach color */
+    .stButton>button {
+        background-color: #FAD5A5;
+        color: #1A1A1A;
+        border-radius: 10px;
+        border: 1px solid #1A1A1A;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 2. Add your Logo (Ensure 'logo.png' is in your GitHub folder)
+try:
+    logo = Image.open("logo.png")
+    st.image(logo, width=200) # Centers or left-aligns your logo
+except:
+    st.title("Radiant Image AI™") # Backup if logo isn't found
+
 st.subheader("L Owens Systems | Rewired for Purpose")
 st.markdown("---")
+
+# Rest of your code continues here...
+
+#### 3. Why this works for your Stan Store
+By injecting this "Style" code:
+*   **Trust:** Your customers will see your colors immediately, making it feel like a professional tool from **L Owens Systems**.
+*   **The "Glow":** The soft cream background reduces eye strain and makes the "Radiant" theme feel literal.
+*   **Editorial Quality:** It removes the standard "white and gray" internet look and gives you a bespoke, high-end studio feel.
+
+Once you commit this to GitHub, your app will instantly transform! Does this "Radiant" color scheme look exactly like what you had in mind for your brand?
 
 # 2. Secure API Connection (Using your vault key)
 try:
