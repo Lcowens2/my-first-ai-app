@@ -2,83 +2,111 @@ import streamlit as st
 import google.generativeai as genai
 from PIL import Image
 
-import streamlit as st
-import google.generativeai as genai
-from PIL import Image
+# 1. Page Config & Professional Branding
+st.set_page_config(page_title="Radiant Image AI", page_icon="✨", layout="wide")
 
-# 1. Page Config & CSS Branding
-st.set_page_config(page_title="Radiant Image AI", page_icon="✨")
-
-# --- CUSTOM COLORS & BACKGROUNDS ---
+# --- HIGH-END EDITORIAL CSS (Modern, Classy, Brown Font) ---
 st.markdown("""
     <style>
-    /* Sets the main background to your brand's Cream color */
+    /* 1. Classy Gradient Background (Cream to softer Peach) */
     .stApp {
-        background-color: #FFF5E1; 
+        background: linear-gradient(180deg, #FFF5E1 0%, #FAE9D1 100%);
     }
-    /* Sets the text and titles to Editorial Charcoal */
-    h1, h2, h3, p {
-        color: #1A1A1A !important;
+
+    /* 2. Professional BROWN Font Color for everything */
+    html, body, [data-testid="stHeader"], p, h1, h2, h3, h4, li, .stSelectbox label, .stTextArea label {
+        color: #8B4513 !important; /* Saddle Brown */
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
-    /* Styles the buttons in your brand's Peach color */
+
+    /* 3. Classy, Subtle Dividers */
+    hr {
+        border-top: 1px solid #D2B48C !important;
+    }
+
+    /* 4. MODERN Button Styling (Brown background, Cream text) */
     .stButton>button {
-        background-color: #FAD5A5;
-        color: #1A1A1A;
+        background-color: #8B4513; 
+        color: #FFF5E1 !important;
+        border-radius: 25px; /* Rounded, modern */
+        border: none;
+        padding: 10px 24px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #A0522D; /* Lighter brown on hover */
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    /* 5. Inputs Styling (Classy cream boxes) */
+    .stSelectbox div[data-baseweb="select"], .stTextArea textarea {
+        background-color: rgba(255, 255, 255, 0.7);
         border-radius: 10px;
-        border: 1px solid #1A1A1A;
+        color: #8B4513 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Add your Logo (Ensure 'logo.png' is in your GitHub folder)
-try:
-    logo = Image.open("logo.png")
-    st.image(logo, width=200) # Centers or left-aligns your logo
-except:
-    st.title("Radiant Image AI™") # Backup if logo isn't found
+# 2. Advanced Branding: Top Right Logo + Left Titles
+col_title, col_logo = st.columns([3, 1]) # 3 parts left, 1 part right
 
-st.subheader("L Owens Systems | Rewired for Purpose")
+with col_title:
+    st.markdown("## L Owens Systems")
+    st.markdown("#### Radiant Image AI™")
+    st.markdown("*Rewired for Purpose*")
+
+with col_logo:
+    # This automatically pulls "logo.png" from your GitHub and places it RIGHT
+    try:
+        logo = Image.open("logo.png")
+        st.image(logo, use_column_width=True) # Fills the right column
+    except:
+        st.write("(Upload logo.png to GitHub)") # Message if logo is missing
+
 st.markdown("---")
 
-# Rest of your code continues here...
-
-# 2. Secure API Connection (Using your vault key)
+# 3. Secure API Connection (The background machinery)
 try:
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
 except:
-    st.error("Connection Error: Please verify your API Key in the Secrets vault.")
+    st.error("Missing API Key in the Secrets Vault!")
 
-# 3. The Identity Lock Interface
-st.write("### 📸 Step 1: Identity Lock")
-uploaded_file = st.file_uploader("Upload your base photo for identity verification", type=["jpg", "png", "jpeg"])
+# 4. Identity Lock Interface (Structured for a modern look)
+st.write("### 📸 STEP 1: Identity Lock")
+st.markdown("*(Upload your professional base photo)*")
+uploaded_file = st.file_uploader("", type=["jpg", "png", "jpeg"]) # Blank label for modern look
 
 st.markdown("---")
-st.write("### 🎨 Step 2: Editorial Customization")
+st.write("### 🎨 STEP 2: Editorial Customization")
 
 # Freestyle Prompt Area
 custom_prompt = st.text_area("Custom Editorial Instructions (Optional)", 
-                             placeholder="Example: 'Wearing gold framed glasses' or 'holding a leather portfolio'...")
+                             placeholder="e.g., 'Wearing gold framed glasses' or 'holding a leather portfolio'...")
 
+st.write("#### Brand Vibe Selection")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.write("**Wardrobe & Lighting**")
-    style = st.selectbox("Clothing Style", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
-    shot_type = st.selectbox("Shot Choice", ["Headshot", "Full Length", "Freestyle", "Studio"])
+    style = st.selectbox("Clothing Aesthetic", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
+    shot_type = st.selectbox("Shot Composition", ["Headshot", "Full Length", "Freestyle", "Studio"])
     lighting = st.selectbox("Lighting Environment", ["Golden Hour", "Studio Softbox", "Dramatic Cinematic", "Natural Daylight"])
 
 with col2:
-    st.write("**Beauty & Location**")
-    makeup = st.selectbox("Makeup Style", ["Soft Glam", "Full Glam", "Natural Glow"])
-    hair = st.selectbox("Hair Style", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
-    theme = st.selectbox("Location Theme", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht", "Penthouse Office"])
+    makeup = st.selectbox("Beauty Profile", ["Soft Glam", "Full Glam", "Natural Glow"])
+    hair = st.selectbox("Hair Presentation", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
+    theme = st.selectbox("Setting/Theme", ["Modern Office", "High-End Hotel Lobby", "Luxury Yacht", "Penthouse Office"])
 
-# 4. Generate Button
+# 5. The "Leadership" Launch Button
 st.markdown("---")
-if st.button("Generate My Radiant Image"):
-    if uploaded_file is not None:
-        st.success("Identity Locked. Creating your ultra-realistic editorial portrait...")
-        # The AI will now merge the 'Radiant Image AI' standards with the user's photo
-    else:
-        st.warning("Please upload a photo first to lock your identity!")
+# We place this in a container and column to help center and elevate it
+with st.container():
+    c_left, c_mid, c_right = st.columns([1,1,1])
+    with c_mid:
+        if st.button("Generate My Radiant Image", key="generate_button"):
+            if uploaded_file is not None:
+                st.success("Identity Locked. Merging your leadership energy with editorial excellence...")
+            else:
+                st.warning("Please upload a photo to lock your identity.")
