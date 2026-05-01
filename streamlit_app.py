@@ -5,7 +5,7 @@ from PIL import Image
 # 1. Page Config
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 
-# --- EDITORIAL CSS (Brown Font, Gradient Background, and BORDER) ---
+# --- EDITORIAL CSS (Hierarchy, Border, Brown Palette) ---
 st.markdown("""
     <style>
     /* 1. Main Background */
@@ -14,14 +14,13 @@ st.markdown("""
     }
 
     /* 2. The Brown Border Frame */
-    /* This creates a clean line around the central content area */
     section.main > div {
         border: 2px solid #8B4513; 
         border-radius: 15px;
-        padding: 40px;
+        padding: 50px;
         margin: 20px;
-        background-color: rgba(255, 255, 255, 0.2); /* Slight lift from background */
-        box-shadow: 0px 10px 30px rgba(139, 69, 19, 0.1);
+        background-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0px 10px 30px rgba(139, 69, 19, 0.05);
     }
 
     /* 3. Global Brown Typography */
@@ -30,42 +29,68 @@ st.markdown("""
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
+    /* 4. Specific Hierarchy Scaling */
+    .radiant-title {
+        font-size: 64px !important; /* The Largest Element */
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        margin-bottom: 0px !important;
+    }
+    
+    .systems-subtitle {
+        font-size: 22px !important; /* Medium/Supporting */
+        font-weight: 400 !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 0px !important;
+    }
+    
+    .purpose-tagline {
+        font-size: 18px !important; /* Smallest/Elegant */
+        font-style: italic !important;
+        opacity: 0.8;
+    }
+
     hr {
         border-top: 1px solid #D2B48C !important;
     }
 
-    /* 4. Modern Button Styling */
+    /* 5. Modern Button Styling */
     .stButton>button {
         background-color: #8B4513; 
         color: #FFF5E1 !important;
         border-radius: 25px;
         border: none;
-        padding: 10px 24px;
+        padding: 12px 30px;
         font-weight: bold;
+        font-size: 18px;
     }
 
-    /* Clean up the upload box label */
-    .stFileUploader label {
-        color: #8B4513 !important;
+    /* Input cleaning */
+    .stSelectbox div[data-baseweb="select"], .stTextArea textarea {
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid #D2B48C;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Top Right Logo + Branding
+# 2. Top Right Logo + Refined Typography Layout
 col_title, col_logo = st.columns([3, 1])
 
 with col_title:
-    st.markdown("## L Owens Systems")
-    st.markdown("#### Radiant Image AI")
-    st.markdown("*Rewired for Purpose*")
+    # We use custom classes to control exact sizing
+    st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
+    st.markdown('<p class="systems-subtitle">L Owens Systems</p>', unsafe_allow_html=True)
+    st.markdown('<p class="purpose-tagline">Rewired for Purpose</p>', unsafe_allow_html=True)
 
 with col_logo:
     try:
+        # Pulls 'logo.png' from your GitHub folder
         logo = Image.open("logo.png")
         st.image(logo, use_column_width=True)
     except:
         st.write(" ") 
 
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("---")
 
 # 3. Secure API Connection
@@ -73,7 +98,7 @@ try:
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
 except:
-    st.error("API Key not found.")
+    st.write(" ")
 
 # 4. Identity Lock Interface
 st.write("### STEP 1: Identity Lock")
@@ -84,7 +109,7 @@ st.markdown("---")
 st.write("### STEP 2: Editorial Customization")
 
 custom_prompt = st.text_area("Custom Editorial Instructions (Optional)", 
-                             placeholder="Add specific details...")
+                             placeholder="Add specific brand details here...")
 
 st.write("#### Brand Vibe Selection")
 col1, col2 = st.columns(2)
