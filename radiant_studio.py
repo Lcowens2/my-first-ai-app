@@ -1,17 +1,11 @@
 import streamlit as st
 from PIL import Image
 import io
+import requests
+import json
+import base64
 
-# 1. FORCE THE NEW LIBRARY
-try:
-    from google import genai
-except ImportError:
-    import subprocess
-    import sys
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
-    from google import genai
-
-# 2. RADIANT STYLING
+# 1. RADIANT STYLING (Editorial Leadership Aesthetic)
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 st.markdown("""
     <style>
@@ -33,34 +27,33 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. BRANDING
+# 2. BRANDING SECTION
 _, col_logo, _ = st.columns([1, 2, 1])
 with col_logo:
     try:
         st.image(Image.open("logo.png"), use_container_width=True)
     except:
+        # Fallback if logo file is missing
         st.markdown("<h1 style='text-align: center; color: #582F0E;'>L. OWENS</h1>", unsafe_allow_html=True)
 
 st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
 st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_html=True)
 
-# 4. STEP 1: KEY ACTIVATION
+# 3. STEP 1: KEY ACTIVATION (Ensures client uses their own key)
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
 customer_key = st.text_input("PASTE YOUR UNIQUE STUDIO KEY HERE", type="password")
 if not customer_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
 
-client = genai.Client(api_key=customer_key)
-
-# 5. STEP 2: IDENTITY LOCK
+# 4. STEP 2: IDENTITY LOCK
 st.markdown("---")
 st.write("### 📸 STEP 2: LOCK YOUR IDENTITY")
 uploaded_file = st.file_uploader("CHOOSE YOUR PHOTO", type=["jpg", "png", "jpeg"])
 if uploaded_file:
     st.image(uploaded_file, width=250, caption="Identity Reference Locked")
 
-# 6. STEP 3: EDITORIAL DIRECTION
+# 5. STEP 3: EDITORIAL DIRECTION
 st.markdown("---")
 st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
 col1, col2 = st.columns(2)
@@ -97,45 +90,36 @@ with col2:
 
     quantity = st.selectbox("QUANTITY", [1, 2, 4])
 
-# 7. STEP 4: FREESTYLE STUDIO
+# 6. STEP 4: FREESTYLE STUDIO
 st.markdown("---")
 st.write("### ✍️ STEP 4: FREESTYLE STUDIO (OPTIONAL)")
-freestyle_prompt = st.text_area("INJECT YOUR OWN CUSTOM PROMPT DETAILS", placeholder="e.g. 'I want to be holding a professional camera' or 'Make the background a library with velvet curtains'...")
+freestyle_prompt = st.text_area("INJECT YOUR OWN CUSTOM PROMPT DETAILS", placeholder="e.g. 'I want to be holding a professional camera'...")
 
-# 8. PRODUCTION
+# 7. PRODUCTION ENGINE
 st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                import requests
-                import json
-                import base64
-
-                # 1. PREPARE THE PROMPT
-                base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
+                # Build prompt
+                base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure and features of the person in the photo. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
 
-                # 2. THE DIRECT REST API CALL
-                st.write("Connecting to Production Servers...")
+                # 2026 Production Model Variants
+                model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-generation-006"]
                 
-                # We try the standard production path first
-                # Model names can vary by account: 'imagen-3', 'imagen-3.0-generate-001', or 'image-generation-006'
-               # The corrected list of model names for 2026
-model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-generation-006"]
                 success = False
+                img_bytes = uploaded_file.getvalue()
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+
                 for model_name in model_variants:
                     if success: break
+                    st.write(f"Connecting to Engine: {model_name}...")
                     
-                    st.write(f"Testing Engine: {model_name}...")
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
-                    
-                    img_bytes = uploaded_file.getvalue()
-                    img_b64 = base64.b64encode(img_bytes).decode('utf-8')
-
                     payload = {
                         "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
-                        "parameters": {"sampleCount": quantity, "aspectRatio": "3:4"}
+                        "parameters": {"sampleCount": quantity, "aspectRatio": "3:4", "personGeneration": "allow_adults"}
                     }
 
                     response = requests.post(url, json=payload)
@@ -146,9 +130,10 @@ model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-ge
                         st.markdown("### YOUR RADIANT ASSETS")
                         grid = st.columns(2)
                         predictions = result.get("predictions", [])
+                        
                         for i, pred in enumerate(predictions):
-                            img_data = base64.b64decode(pred["bytesBase64Encoded"])
-                            generated_img = Image.open(io.BytesIO(img_data))
+                            gen_img_data = base64.b64decode(pred["bytesBase64Encoded"])
+                            generated_img = Image.open(io.BytesIO(gen_img_data))
                             grid[i % 2].image(generated_img, use_container_width=True)
                             
                             buf = io.BytesIO()
@@ -156,13 +141,12 @@ model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-ge
                             st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
-                
+
                 if not success:
-                    st.error("Studio Note: Imagen 3 access is not yet active on this API Key.")
-                    st.info("To fix this: Go to Google AI Studio, create a NEW API Key, and ensure you have accepted the latest 'Generative AI Terms of Service'.")
+                    st.error("Studio Note: Access is not yet active for these models on this API Key.")
+                    st.info("Resolution: Please ensure you have enabled a billing method in Google AI Studio to unlock Image APIs.")
 
             except Exception as e:
-                st.error(f"Studio Note: {e}")
+                st.error(f"Studio Error: {e}")
     else:
         st.warning("Please upload a photo first.")
-        
