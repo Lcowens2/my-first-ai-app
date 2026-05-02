@@ -105,8 +105,8 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure and features of the person in the photo. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
 
-                # 2026 Production Model Variants
-                model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-generation-006"]
+              # Updated list to use the high-fidelity Pro model first
+              model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "imagen-3.0-generate-001"]
                 
                 success = False
                 img_bytes = uploaded_file.getvalue()
