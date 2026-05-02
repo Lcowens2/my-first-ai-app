@@ -111,24 +111,45 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 # Build the prompt dynamically
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 
-                # Add freestyle notes if they exist
                 final_prompt = base_details
                 if freestyle_prompt:
                     final_prompt += f" Additional Notes: {freestyle_prompt}"
                 
-                response = client.models.generate_image(
-                    model='imagen-3',
-                    prompt=final_prompt,
-                    config=genai.types.GenerateImageConfig(
-                        number_of_images=quantity,
-                        aspect_ratio="3:4",
-                        person_generation="allow_adults"
+                st.write("Engine connected. Generating...")
+
+                # --- THE SELF-HEALING LOGIC ---
+                # We try 'generate_images' first (the most likely name)
+                try:
+                    response = client.models.generate_images(
+                        model='imagen-3',
+                        prompt=final_prompt,
+                        config=genai.types.GenerateImageConfig(
+                            number_of_images=quantity,
+                            aspect_ratio="3:4",
+                            person_generation="allow_adults"
+                        )
                     )
-                )
+                except AttributeError:
+                    # If that fails, we try 'generate_image' (singular)
+                    response = client.models.generate_image(
+                        model='imagen-3',
+                        prompt=final_prompt,
+                        config=genai.types.GenerateImageConfig(
+                            number_of_images=quantity,
+                            aspect_ratio="3:4",
+                            person_generation="allow_adults"
+                        )
+                    )
                 
                 st.markdown("### YOUR RADIANT ASSETS")
                 grid = st.columns(2)
-                for i, img_obj in enumerate(response.generated_images):
+                
+                # Check if the response has images and display them
+                images = getattr(response, 'generated_images', [])
+                if not images and hasattr(response, 'images'):
+                    images = response.images
+
+                for i, img_obj in enumerate(images):
                     grid[i % 2].image(img_obj.image, use_container_width=True)
                     buf = io.BytesIO()
                     img_obj.image.save(buf, format="PNG")
@@ -138,5 +159,6 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 
             except Exception as e:
                 st.error(f"Studio Note: {e}")
+                st.info("Technical Tip: Ensure your API Key has 'Imagen' permissions enabled in the Google AI Studio settings.")
     else:
         st.warning("Please upload a photo first.")
