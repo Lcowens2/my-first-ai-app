@@ -123,16 +123,8 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
            # Change this line in your main script:
         img_model = genai.ImageGenerationModel("imagen-3")
             
-           # 5. The Production Line
-if st.button("PRODUCE MY RADIANT ASSETS"):
-    if uploaded_file is not None:
-        with st.status("Crafting Ultra-Realistic Render...", expanded=True) as status:
-            try:
-                st.write("Initializing Production Engine...")
-                
-                # Setup the Image Model
-                img_model = genai.ImageGenerationModel("imagen-3") 
-                
+                         
+                               
                 # Construct the prompt with strict identity and texture rules
                 full_prompt = f"""
                 ULTRA-REALISTIC PHOTOGRAPHY. 8K resolution. RAW format.
