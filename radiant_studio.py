@@ -94,17 +94,10 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                st.write("Initializing AI Engine...")
+                st.write("Initializing Imagen 3 Engine...")
                 
-                # --- THE BYPASS LOGIC ---
-                # This bypasses the 'AttributeError' by calling the tool via its full path
-                try:
-                    from google.generativeai import types
-                    img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
-                except AttributeError:
-                    # Fallback for stubborn servers
-                    import google.generativeai.types as gai_types
-                    img_model = genai.GenerativeModel("imagen-3.0-generate-001")
+                # Using the standard Imagen 3 name that is compatible with the latest library
+                img_model = genai.ImageGenerationModel("imagen-3")
                 
                 full_prompt = f"""
                 ULTRA-REALISTIC HIGH-END PHOTOGRAPHY. 8K resolution. RAW format.
@@ -121,29 +114,40 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 - Environment: {theme}
                 - Lighting: {lighting}
                 
-                Aesthetic: Professional leadership, polished editorial, high-end quality.
+                Aesthetic: Professional leadership, polished editorial, high-end magazine quality.
                 """
                 
                 st.write("Generating assets via Imagen 3...")
                 
-                # Bypassing the error by using the standard generation call
-                response = img_model.generate_content(
-                    contents=[full_prompt, Image.open(uploaded_file)]
+                # The specific "door" for image generation
+                response = img_model.generate_images(
+                    prompt=full_prompt,
+                    number_of_images=quantity,
+                    aspect_ratio="3:4",
+                    person_generation="allow_adults"
                 )
                 
-                # Note: If the bypass is active, the results handling needs to be flexible
                 st.markdown("### YOUR RADIANT ASSETS")
-                if hasattr(response, 'images'):
-                    grid = st.columns(2)
-                    for i, result in enumerate(response.images):
-                        grid[i % 2].image(result.image, use_container_width=True)
-                else:
-                    st.write(response.text) # Safety fallback
+                grid = st.columns(2)
+                for i, result in enumerate(response.images):
+                    grid[i % 2].image(result.image, use_container_width=True)
+                    
+                    buf = io.BytesIO()
+                    result.image.save(buf, format="PNG")
+                    st.download_button(
+                        label=f"DOWNLOAD ASSET {i+1}", 
+                        data=buf.getvalue(), 
+                        file_name=f"radiant_asset_{i+1}.png", 
+                        mime="image/png", 
+                        key=f"dl_{i}"
+                    )
                 
                 status.update(label="Assets Successfully Crafted!", state="complete")
                 
             except Exception as e:
+                # If it's a permission error, it's likely the API Key settings
                 st.error(f"Studio Note: {e}")
-                st.info("The server is still finishing its update. Please wait 60 seconds and try one last time.")
+                if "403" in str(e):
+                    st.warning("Your Google API Key may not have 'Imagen' permissions enabled yet.")
     else:
         st.warning("Please upload your photo in Step 2 before producing.")
