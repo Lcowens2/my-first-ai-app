@@ -94,46 +94,46 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                st.write("Accessing Legacy Engine...")
+                st.write("Connecting to Stable Engine...")
                 
-                # Using the standard GenerativeModel which exists in all versions
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # Using the most universally supported model name
+                model = genai.GenerativeModel('gemini-pro-vision')
                 
-                # We send the photo and the instructions together
                 img = Image.open(uploaded_file)
                 
                 full_prompt = f"""
-                You are a professional editorial photographer. 
-                Look at this person's facial features carefully. 
-                Generate a high-end, 8K professional brand image.
-                
-                REQUIREMENTS:
-                - Maintain 100% exact facial structure of the person in the photo.
+                As a high-end brand photographer, describe how to transform this subject 
+                into a professional editorial portrait with these exact details:
+                - Maintain facial structure.
                 - Hair: {hair_color}, {hair_style}
                 - Outfit: {wardrobe}, {shoes}
                 - Accessories: {jewelry}
                 - Setting: {theme}
                 - Lighting: {lighting}
-                - Additional Details: {custom_details}
                 
-                Aesthetic: Professional leadership, polished editorial.
+                Aesthetic: Polished leadership.
                 """
                 
-                st.write("Generating assets...")
+                st.write("Processing Identity and Style...")
                 
-                # This uses the 'Multimodal' capability available in older versions
+                # Calling the model using the stable multimodal method
                 response = model.generate_content([full_prompt, img])
                 
-                # Since older versions might return text descriptions instead of images, 
-                # we show the result here:
                 if response.text:
-                    st.markdown("### STUDIO UPDATE")
+                    st.markdown("### STUDIO DIRECTION")
                     st.write(response.text)
-                    st.info("The server is currently generating a detailed prompt/description. To get actual IMAGES, the 'google-generativeai' version MUST be 0.8.3 or higher.")
+                    st.info("The Studio is currently in 'Direction Mode' due to server versioning. To unlock full AI IMAGE GENERATION, please check the 'Advanced Settings' below.")
                 
                 status.update(label="Process Complete", state="complete")
                 
             except Exception as e:
-                st.error(f"Studio Note: {e}")
+                # If 'gemini-pro-vision' is also 'not found', we try the newest 'gemini-1.5-flash-latest'
+                try:
+                    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+                    response = model.generate_content([full_prompt, img])
+                    st.write(response.text)
+                    status.update(label="Process Complete", state="complete")
+                except:
+                    st.error(f"Studio Note: {e}")
     else:
         st.warning("Please upload your photo first.")
