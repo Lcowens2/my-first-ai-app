@@ -95,18 +95,25 @@ st.markdown("---")
 st.write("### ✍️ STEP 4: FREESTYLE STUDIO (OPTIONAL)")
 freestyle_prompt = st.text_area("INJECT YOUR OWN CUSTOM PROMPT DETAILS", placeholder="e.g. 'I want to be holding a professional camera'...")
 
-# 7. PRODUCTION ENGINE
+# 8. PRODUCTION ENGINE
 st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # Build prompt
+                import requests
+                import json
+                import base64
+
+                # 1. PREPARE THE PROMPT
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure and features of the person in the photo. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
 
-             # Updated list to use the high-fidelity Pro model first
-model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "imagen-3.0-generate-001"]
+                # 2. THE DIRECT REST API CALL
+                st.write("Connecting to Production Servers...")
+                
+                # Updated list to prioritize the high-end Pro model for your Paid tier
+                model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "imagen-3.0-generate-001"]
                 
                 success = False
                 img_bytes = uploaded_file.getvalue()
@@ -114,7 +121,7 @@ model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "image
 
                 for model_name in model_variants:
                     if success: break
-                    st.write(f"Connecting to Engine: {model_name}...")
+                    st.write(f"Testing Engine: {model_name}...")
                     
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
                     payload = {
@@ -144,9 +151,10 @@ model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "image
 
                 if not success:
                     st.error("Studio Note: Access is not yet active for these models on this API Key.")
-                    st.info("Resolution: Please ensure you have enabled a billing method in Google AI Studio to unlock Image APIs.")
+                    st.info("Since your billing is active (Paid 1), please ensure this specific API Key was created INSIDE the 'Radiant Image AI' project.")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
+                
     else:
         st.warning("Please upload a photo first.")
