@@ -67,6 +67,8 @@ st.markdown("---")
 st.write("### 📸 STEP 2: LOCK YOUR IDENTITY")
 uploaded_file = st.file_uploader("CHOOSE YOUR PHOTO", type=["jpg", "png", "jpeg"])
 
+if uploaded_file:
+    st.image(uploaded_file, width=200, caption="Identity Locked")
 # 6. STEP 3: THE EDITORIAL DIRECTION
 st.markdown("---")
 st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
