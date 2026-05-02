@@ -123,28 +123,36 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
            # Change this line in your main script:
         img_model = genai.ImageGenerationModel("imagen-3")
             
-            # 2. Build the Ultra-Realistic Prompt
-            full_prompt = f"""
-            ULTRA-REALISTIC PHOTOGRAPHY. 8K resolution. RAW format.
-            Maintain 100% exact facial structure, skin tone, and features of the person in the attached photo.
-            NO BEAUTIFICATION. NO SKIN SMOOTHING. SHOW NATURAL SKIN PORES and authentic texture.
-            EYES MUST BE VIVID AND LIFELIKE. Correct body proportions. NO LARGE HEADS.
-            
-            STYLING:
-            - Clothing: {style}
-            - Shot: {shot_type}
-            - Hair: {hair}
-            - Lighting: {lighting}
-            - Background: {theme}
-            
-            Ensure the result looks like a high-end editorial magazine photo.
-            """
-            
+           # 5. The Production Line
+if st.button("PRODUCE MY RADIANT ASSETS"):
+    if uploaded_file is not None:
+        with st.status("Crafting Ultra-Realistic Render...", expanded=True) as status:
             try:
-                # 3. Generate
-                st.write("Generating assets via Imagen 3...")
-                user_img = Image.open(uploaded_file)
+                st.write("Initializing Production Engine...")
                 
+                # Setup the Image Model
+                img_model = genai.ImageGenerationModel("imagen-3") 
+                
+                # Construct the prompt with strict identity and texture rules
+                full_prompt = f"""
+                ULTRA-REALISTIC PHOTOGRAPHY. 8K resolution. RAW format.
+                Maintain 100% exact facial structure, skin tone, and features.
+                NO BEAUTIFICATION. NO SKIN SMOOTHING. SHOW NATURAL SKIN PORES and authentic texture.
+                EYES MUST BE VIVID AND LIFELIKE. Correct body proportions. NO LARGE HEADS.
+                
+                STYLING:
+                - Clothing: {style}
+                - Shot: {shot_type}
+                - Hair: {hair}
+                - Lighting: {lighting}
+                - Background: {theme}
+                
+                Ensure the result looks like a high-end editorial magazine photo.
+                """
+                
+                st.write("Generating assets...")
+                
+                # Execute generation
                 response = img_model.generate_images(
                     prompt=full_prompt,
                     number_of_images=output_count,
@@ -154,17 +162,19 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
                 
                 status.update(label="Assets Crafted!", state="complete", expanded=False)
                 
-                # 4. Display Results
+                # Display and Download Logic
                 st.markdown("### YOUR RADIANT ASSETS")
                 cols = st.columns(2)
                 for i, result in enumerate(response.images):
                     cols[i % 2].image(result.image, use_container_width=True)
-                    # Add download button
+                    
                     buf = io.BytesIO()
                     result.image.save(buf, format="PNG")
                     st.download_button(f"Download Image {i+1}", buf.getvalue(), f"radiant_asset_{i+1}.png", "image/png")
 
             except Exception as e:
-                st.error(f"Generation error: {e}. Ensure your API key has 'Imagen' enabled in Google Cloud.")
+                # Provides a graceful error message if the customer's key lacks permissions
+                st.error(f"Access Note: {e}")
+                st.info("Tip: Ensure your Google API Key has 'Imagen' permissions enabled in the Google Cloud Console.")
     else:
         st.warning("Please upload a photo first.")
