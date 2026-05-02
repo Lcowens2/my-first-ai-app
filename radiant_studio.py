@@ -117,58 +117,52 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
 
                 # 2. THE DIRECT REST API CALL
-                st.write("Bypassing library blocks... Speaking to Google Direct.")
+                st.write("Connecting to Production Servers...")
                 
-                # API Endpoint for Imagen 3
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3:predict?key={customer_key}"
+                # We try the standard production path first
+                # Model names can vary by account: 'imagen-3', 'imagen-3.0-generate-001', or 'image-generation-006'
+                model_variants = ["imagen-3", "imagen-3.0-generate-001", "image-generation-006"]
                 
-                # Convert uploaded image to Base64
-                img_bytes = uploaded_file.getvalue()
-                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                success = False
+                for model_name in model_variants:
+                    if success: break
+                    
+                    st.write(f"Testing Engine: {model_name}...")
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
+                    
+                    img_bytes = uploaded_file.getvalue()
+                    img_b64 = base64.b64encode(img_bytes).decode('utf-8')
 
-                payload = {
-                    "instances": [
-                        {
-                            "prompt": final_prompt,
-                            "image": {"bytesBase64Encoded": img_b64}
-                        }
-                    ],
-                    "parameters": {
-                        "sampleCount": quantity,
-                        "aspectRatio": "3:4",
-                        "personGeneration": "allow_adults"
+                    payload = {
+                        "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
+                        "parameters": {"sampleCount": quantity, "aspectRatio": "3:4"}
                     }
-                }
 
-                response = requests.post(url, json=payload)
-                result = response.json()
+                    response = requests.post(url, json=payload)
+                    result = response.json()
 
-                # 3. HANDLE RESULTS
-                if response.status_code == 200:
-                    st.markdown("### YOUR RADIANT ASSETS")
-                    grid = st.columns(2)
-                    
-                    # Imagen returns images as base64 strings in the 'predictions' list
-                    predictions = result.get("predictions", [])
-                    for i, pred in enumerate(predictions):
-                        img_data = base64.b64decode(pred["bytesBase64Encoded"])
-                        generated_img = Image.open(io.BytesIO(img_data))
+                    if response.status_code == 200:
+                        success = True
+                        st.markdown("### YOUR RADIANT ASSETS")
+                        grid = st.columns(2)
+                        predictions = result.get("predictions", [])
+                        for i, pred in enumerate(predictions):
+                            img_data = base64.b64decode(pred["bytesBase64Encoded"])
+                            generated_img = Image.open(io.BytesIO(img_data))
+                            grid[i % 2].image(generated_img, use_container_width=True)
+                            
+                            buf = io.BytesIO()
+                            generated_img.save(buf, format="PNG")
+                            st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
                         
-                        grid[i % 2].image(generated_img, use_container_width=True)
-                        
-                        buf = io.BytesIO()
-                        generated_img.save(buf, format="PNG")
-                        st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
-                    
-                    status.update(label="Assets Successfully Crafted!", state="complete")
-                else:
-                    # Specific error handling
-                    error_msg = result.get("error", {}).get("message", "Unknown API Error")
-                    st.error(f"Studio Note: {error_msg}")
-                    if "403" in str(response.status_code):
-                        st.info("Tip: This key does not have permission for Imagen 3. Please check your Google Cloud/AI Studio billing or project settings.")
+                        status.update(label="Assets Successfully Crafted!", state="complete")
+                
+                if not success:
+                    st.error("Studio Note: Imagen 3 access is not yet active on this API Key.")
+                    st.info("To fix this: Go to Google AI Studio, create a NEW API Key, and ensure you have accepted the latest 'Generative AI Terms of Service'.")
 
             except Exception as e:
                 st.error(f"Studio Note: {e}")
     else:
         st.warning("Please upload a photo first.")
+        
