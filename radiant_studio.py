@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 import io
 
-# 1. FORCE THE NEW LIBRARY (If the server is lagging)
+# 1. FORCE THE NEW LIBRARY
 try:
     from google import genai
 except ImportError:
@@ -11,7 +11,7 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
     from google import genai
 
-# 2. RADIANT STYLING (The high-end editorial look)
+# 2. RADIANT STYLING
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 st.markdown("""
     <style>
@@ -28,8 +28,8 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=Quicksand:wght@400;600&display=swap');
     .radiant-title { font-family: 'Cormorant Garamond', serif; font-size: 85px !important; color: #582F0E !important; text-align: center; font-style: italic; margin-top: -20px; }
     .systems-subtitle { font-family: 'Quicksand', sans-serif; font-size: 22px !important; color: #7F5539 !important; text-align: center; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 40px; }
-    .stButton>button { background: #B08968; color: white !important; border-radius: 60px; border: none; padding: 25px; font-size: 24px; font-weight: bold; width: 100%; box-shadow: 0px 10px 20px rgba(176, 137, 104, 0.3); }
-    h3 { font-family: 'Cormorant Garamond', serif; font-size: 35px !important; color: #582F0E !important; border-bottom: 1px solid #EAD2AC; }
+    .stButton>button { background: #B08968; color: white !important; border-radius: 60px; border: none; padding: 25px; font-size: 24px; font-weight: bold; width: 100%; box-shadow: 0px 10px 20px rgba(176, 137, 104, 0.3); margin-top: 20px; }
+    h3 { font-family: 'Cormorant Garamond', serif; font-size: 35px !important; color: #582F0E !important; border-bottom: 1px solid #EAD2AC; padding-bottom: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -47,12 +47,10 @@ st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_
 # 4. STEP 1: KEY ACTIVATION
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
 customer_key = st.text_input("PASTE YOUR UNIQUE STUDIO KEY HERE", type="password")
-
 if not customer_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
 
-# Initialize the NEW Google Client
 client = genai.Client(api_key=customer_key)
 
 # 5. STEP 2: IDENTITY LOCK
@@ -60,36 +58,67 @@ st.markdown("---")
 st.write("### 📸 STEP 2: LOCK YOUR IDENTITY")
 uploaded_file = st.file_uploader("CHOOSE YOUR PHOTO", type=["jpg", "png", "jpeg"])
 if uploaded_file:
-    st.image(uploaded_file, width=250, caption="Identity Locked")
+    st.image(uploaded_file, width=250, caption="Identity Reference Locked")
 
 # 6. STEP 3: EDITORIAL DIRECTION
 st.markdown("---")
 st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
 col1, col2 = st.columns(2)
-with col1:
-    hair_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey"])
-    hair_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo"])
-    wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial"])
-    shoes = st.selectbox("SHOES", ["Pumps", "Strappy Sandals", "Dressy Flats", "Classic Loafers"])
-with col2:
-    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand"])
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background"])
-    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
-    quantity = st.selectbox("QUANTITY", [1, 2])
 
-# 7. STEP 4: PRODUCTION
+with col1:
+    h_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey", "Other..."])
+    if h_color == "Other...":
+        h_color = st.text_input("SPECIFY HAIR COLOR")
+
+    h_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo", "Other..."])
+    if h_style == "Other...":
+        h_style = st.text_input("SPECIFY HAIR STYLE")
+
+    wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial", "Other..."])
+    if wardrobe == "Other...":
+        wardrobe = st.text_input("SPECIFY WARDROBE")
+
+    shoes = st.selectbox("SHOES", ["Pumps", "Strappy Sandals", "Dressy Flats", "Classic Loafers", "Other..."])
+    if shoes == "Other...":
+        shoes = st.text_input("SPECIFY SHOES")
+
+with col2:
+    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand", "Other..."])
+    if shot_style == "Other...":
+        shot_style = st.text_input("SPECIFY SHOT STYLE")
+
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background", "Other..."])
+    if theme == "Other...":
+        theme = st.text_input("SPECIFY ENVIRONMENT")
+
+    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow", "Other..."])
+    if lighting == "Other...":
+        lighting = st.text_input("SPECIFY LIGHTING")
+
+    quantity = st.selectbox("QUANTITY", [1, 2, 4])
+
+# 7. STEP 4: FREESTYLE STUDIO
+st.markdown("---")
+st.write("### ✍️ STEP 4: FREESTYLE STUDIO (OPTIONAL)")
+freestyle_prompt = st.text_area("INJECT YOUR OWN CUSTOM PROMPT DETAILS", placeholder="e.g. 'I want to be holding a professional camera' or 'Make the background a library with velvet curtains'...")
+
+# 8. PRODUCTION
 st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # NEW MAPPING for the new SDK
-                full_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {hair_color}, {hair_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
+                # Build the prompt dynamically
+                base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 
-                # Using the NEW models.generate_image method
+                # Add freestyle notes if they exist
+                final_prompt = base_details
+                if freestyle_prompt:
+                    final_prompt += f" Additional Notes: {freestyle_prompt}"
+                
                 response = client.models.generate_image(
                     model='imagen-3',
-                    prompt=full_prompt,
+                    prompt=final_prompt,
                     config=genai.types.GenerateImageConfig(
                         number_of_images=quantity,
                         aspect_ratio="3:4",
@@ -98,9 +127,9 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 )
                 
                 st.markdown("### YOUR RADIANT ASSETS")
+                grid = st.columns(2)
                 for i, img_obj in enumerate(response.generated_images):
-                    st.image(img_obj.image, use_container_width=True)
-                    # Download logic
+                    grid[i % 2].image(img_obj.image, use_container_width=True)
                     buf = io.BytesIO()
                     img_obj.image.save(buf, format="PNG")
                     st.download_button(f"DOWNLOAD ASSET {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
