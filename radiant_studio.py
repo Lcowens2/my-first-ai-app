@@ -108,51 +108,66 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # 1. BUILD THE PROMPT
+                import requests
+                import json
+                import base64
+
+                # 1. PREPARE THE PROMPT
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
-                
-                st.write("Initiating Secure Connection...")
 
-                # 2. THE DIRECT CALL BYPASS
-                # We bypass the 'Models' attribute entirely by calling the core generation function
-                try:
-                    # Attempting the most direct route possible in the new SDK
-                    response = client.request(
-                        path='/v1beta/models/imagen-3:predict',
-                        method='POST',
-                        body={
-                            "instances": [{"prompt": final_prompt, "image": Image.open(uploaded_file)}],
-                            "parameters": {"sampleCount": quantity, "aspectRatio": "3:4"}
+                # 2. THE DIRECT REST API CALL
+                st.write("Bypassing library blocks... Speaking to Google Direct.")
+                
+                # API Endpoint for Imagen 3
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3:predict?key={customer_key}"
+                
+                # Convert uploaded image to Base64
+                img_bytes = uploaded_file.getvalue()
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+
+                payload = {
+                    "instances": [
+                        {
+                            "prompt": final_prompt,
+                            "image": {"bytesBase64Encoded": img_b64}
                         }
-                    )
-                except Exception:
-                    # Fallback to the standard generation using the most basic model name
-                    st.write("Using Standard Image Engine...")
-                    response = client.models.generate_image(
-                        model='imagen-3',
-                        prompt=final_prompt,
-                        config={'number_of_images': quantity, 'aspect_ratio': "3:4"}
-                    )
+                    ],
+                    "parameters": {
+                        "sampleCount": quantity,
+                        "aspectRatio": "3:4",
+                        "personGeneration": "allow_adults"
+                    }
+                }
 
-                # 3. DISPLAY RESULTS
-                st.markdown("### YOUR RADIANT ASSETS")
-                grid = st.columns(2)
-                
-                images = getattr(response, 'generated_images', getattr(response, 'images', []))
-                
-                if images:
-                    for i, img_obj in enumerate(images):
-                        display_img = img_obj.image if hasattr(img_obj, 'image') else img_obj
-                        grid[i % 2].image(display_img, use_container_width=True)
+                response = requests.post(url, json=payload)
+                result = response.json()
+
+                # 3. HANDLE RESULTS
+                if response.status_code == 200:
+                    st.markdown("### YOUR RADIANT ASSETS")
+                    grid = st.columns(2)
+                    
+                    # Imagen returns images as base64 strings in the 'predictions' list
+                    predictions = result.get("predictions", [])
+                    for i, pred in enumerate(predictions):
+                        img_data = base64.b64decode(pred["bytesBase64Encoded"])
+                        generated_img = Image.open(io.BytesIO(img_data))
+                        
+                        grid[i % 2].image(generated_img, use_container_width=True)
+                        
                         buf = io.BytesIO()
-                        display_img.save(buf, format="PNG")
+                        generated_img.save(buf, format="PNG")
                         st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
+                    
+                    status.update(label="Assets Successfully Crafted!", state="complete")
                 else:
-                    st.error("Studio Note: The API returned no images. This usually means the API Key does not have Imagen 3 permissions yet.")
-                
-                status.update(label="Process Complete", state="complete")
-                
+                    # Specific error handling
+                    error_msg = result.get("error", {}).get("message", "Unknown API Error")
+                    st.error(f"Studio Note: {error_msg}")
+                    if "403" in str(response.status_code):
+                        st.info("Tip: This key does not have permission for Imagen 3. Please check your Google Cloud/AI Studio billing or project settings.")
+
             except Exception as e:
                 st.error(f"Studio Note: {e}")
     else:
