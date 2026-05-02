@@ -108,57 +108,63 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # Build the prompt dynamically
+                # 1. BUILD THE PROMPT
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
+                final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
                 
-                final_prompt = base_details
-                if freestyle_prompt:
-                    final_prompt += f" Additional Notes: {freestyle_prompt}"
-                
-                st.write("Engine connected. Generating...")
+                st.write("Searching for Image Engine...")
 
-                # --- THE SELF-HEALING LOGIC ---
-                # We try 'generate_images' first (the most likely name)
-                try:
-                    response = client.models.generate_images(
-                        model='imagen-3',
-                        prompt=final_prompt,
-                        config=genai.types.GenerateImageConfig(
-                            number_of_images=quantity,
-                            aspect_ratio="3:4",
-                            person_generation="allow_adults"
-                        )
-                    )
-                except AttributeError:
-                    # If that fails, we try 'generate_image' (singular)
-                    response = client.models.generate_image(
-                        model='imagen-3',
-                        prompt=final_prompt,
-                        config=genai.types.GenerateImageConfig(
-                            number_of_images=quantity,
-                            aspect_ratio="3:4",
-                            person_generation="allow_adults"
-                        )
-                    )
+                # 2. DYNAMIC COMMAND DISCOVERY
+                # This checks exactly what the server is capable of doing
+                response = None
                 
+                # Option A: The newest 'google-genai' SDK (client.models.generate_image)
+                if hasattr(client, 'models'):
+                    st.write("Using Modern GenAI Engine...")
+                    # Try plural first, then singular
+                    func = getattr(client.models, 'generate_images', getattr(client.models, 'generate_image', None))
+                    if func:
+                        response = func(
+                            model='imagen-3',
+                            prompt=final_prompt,
+                            config={'number_of_images': quantity, 'aspect_ratio': "3:4", 'person_generation': "allow_adults"}
+                        )
+                
+                # Option B: The legacy 'google-generativeai' SDK (genai.ImageGenerationModel)
+                if response is None:
+                    st.write("Using Legacy Engine fallback...")
+                    import google.generativeai as legacy_genai
+                    legacy_genai.configure(api_key=customer_key)
+                    model = legacy_genai.ImageGenerationModel("imagen-3.0-generate-001")
+                    response = model.generate_images(
+                        prompt=final_prompt,
+                        number_of_images=quantity,
+                        aspect_ratio="3:4",
+                        person_generation="allow_adults"
+                    )
+
+                # 3. DISPLAY RESULTS
                 st.markdown("### YOUR RADIANT ASSETS")
                 grid = st.columns(2)
                 
-                # Check if the response has images and display them
-                images = getattr(response, 'generated_images', [])
-                if not images and hasattr(response, 'images'):
-                    images = response.images
-
+                # Flexible result handling for both new and old SDKs
+                images = []
+                if hasattr(response, 'generated_images'): images = response.generated_images
+                elif hasattr(response, 'images'): images = response.images
+                
                 for i, img_obj in enumerate(images):
-                    grid[i % 2].image(img_obj.image, use_container_width=True)
+                    # Handle both PIL objects and the new SDK image objects
+                    display_img = img_obj.image if hasattr(img_obj, 'image') else img_obj
+                    grid[i % 2].image(display_img, use_container_width=True)
+                    
                     buf = io.BytesIO()
-                    img_obj.image.save(buf, format="PNG")
+                    display_img.save(buf, format="PNG")
                     st.download_button(f"DOWNLOAD ASSET {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
                 
                 status.update(label="Assets Successfully Crafted!", state="complete")
                 
             except Exception as e:
                 st.error(f"Studio Note: {e}")
-                st.info("Technical Tip: Ensure your API Key has 'Imagen' permissions enabled in the Google AI Studio settings.")
+                st.info("If you see a '403' or 'Permission' error, please visit Google AI Studio and ensure your API Key is authorized for 'Imagen'.")
     else:
         st.warning("Please upload a photo first.")
