@@ -121,8 +121,8 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 
                 # We try the standard production path first
                 # Model names can vary by account: 'imagen-3', 'imagen-3.0-generate-001', or 'image-generation-006'
-                [model='gemini-2.5-flash-image', "imagen-3.0-generate-001", "image-generation-006"]
-                
+               # The corrected list of model names for 2026
+model_variants = ["gemini-2.5-flash-image", "imagen-3.0-generate-001", "image-generation-006"]
                 success = False
                 for model_name in model_variants:
                     if success: break
