@@ -112,59 +112,48 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
                 
-                st.write("Searching for Image Engine...")
+                st.write("Initiating Secure Connection...")
 
-                # 2. DYNAMIC COMMAND DISCOVERY
-                # This checks exactly what the server is capable of doing
-                response = None
-                
-                # Option A: The newest 'google-genai' SDK (client.models.generate_image)
-                if hasattr(client, 'models'):
-                    st.write("Using Modern GenAI Engine...")
-                    # Try plural first, then singular
-                    func = getattr(client.models, 'generate_images', getattr(client.models, 'generate_image', None))
-                    if func:
-                        response = func(
-                            model='imagen-3',
-                            prompt=final_prompt,
-                            config={'number_of_images': quantity, 'aspect_ratio': "3:4", 'person_generation': "allow_adults"}
-                        )
-                
-                # Option B: The legacy 'google-generativeai' SDK (genai.ImageGenerationModel)
-                if response is None:
-                    st.write("Using Legacy Engine fallback...")
-                    import google.generativeai as legacy_genai
-                    legacy_genai.configure(api_key=customer_key)
-                    model = legacy_genai.ImageGenerationModel("imagen-3.0-generate-001")
-                    response = model.generate_images(
+                # 2. THE DIRECT CALL BYPASS
+                # We bypass the 'Models' attribute entirely by calling the core generation function
+                try:
+                    # Attempting the most direct route possible in the new SDK
+                    response = client.request(
+                        path='/v1beta/models/imagen-3:predict',
+                        method='POST',
+                        body={
+                            "instances": [{"prompt": final_prompt, "image": Image.open(uploaded_file)}],
+                            "parameters": {"sampleCount": quantity, "aspectRatio": "3:4"}
+                        }
+                    )
+                except Exception:
+                    # Fallback to the standard generation using the most basic model name
+                    st.write("Using Standard Image Engine...")
+                    response = client.models.generate_image(
+                        model='imagen-3',
                         prompt=final_prompt,
-                        number_of_images=quantity,
-                        aspect_ratio="3:4",
-                        person_generation="allow_adults"
+                        config={'number_of_images': quantity, 'aspect_ratio': "3:4"}
                     )
 
                 # 3. DISPLAY RESULTS
                 st.markdown("### YOUR RADIANT ASSETS")
                 grid = st.columns(2)
                 
-                # Flexible result handling for both new and old SDKs
-                images = []
-                if hasattr(response, 'generated_images'): images = response.generated_images
-                elif hasattr(response, 'images'): images = response.images
+                images = getattr(response, 'generated_images', getattr(response, 'images', []))
                 
-                for i, img_obj in enumerate(images):
-                    # Handle both PIL objects and the new SDK image objects
-                    display_img = img_obj.image if hasattr(img_obj, 'image') else img_obj
-                    grid[i % 2].image(display_img, use_container_width=True)
-                    
-                    buf = io.BytesIO()
-                    display_img.save(buf, format="PNG")
-                    st.download_button(f"DOWNLOAD ASSET {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
+                if images:
+                    for i, img_obj in enumerate(images):
+                        display_img = img_obj.image if hasattr(img_obj, 'image') else img_obj
+                        grid[i % 2].image(display_img, use_container_width=True)
+                        buf = io.BytesIO()
+                        display_img.save(buf, format="PNG")
+                        st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
+                else:
+                    st.error("Studio Note: The API returned no images. This usually means the API Key does not have Imagen 3 permissions yet.")
                 
-                status.update(label="Assets Successfully Crafted!", state="complete")
+                status.update(label="Process Complete", state="complete")
                 
             except Exception as e:
                 st.error(f"Studio Note: {e}")
-                st.info("If you see a '403' or 'Permission' error, please visit Google AI Studio and ensure your API Key is authorized for 'Imagen'.")
     else:
         st.warning("Please upload a photo first.")
