@@ -10,137 +10,80 @@ st.set_page_config(page_title="Radiant Image AI", layout="wide")
 st.markdown("""
     <style>
     .stApp { background: linear-gradient(135deg, #FDE2E4 0%, #FFF1E6 100%); }
-    
     section.main > div {
         border: 4px solid #EAD2AC;
         outline: 20px solid #DDB892;
         border-radius: 30px;
-        padding: 60px;
+        padding: 50px;
         margin: 20px;
         background-color: rgba(255, 241, 230, 0.9);
-        box-shadow: 0px 15px 35px rgba(88, 47, 14, 0.1);
     }
-    
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,600&family=Quicksand:wght@400;600&display=swap');
-    
-    .radiant-title { 
-        font-family: 'Cormorant Garamond', serif; 
-        font-size: clamp(40px, 8vw, 85px) !important; 
-        color: #582F0E !important; 
-        line-height: 0.9 !important; 
-        font-style: italic; 
-        margin-bottom: 10px !important; 
-    }
-    
-    .systems-subtitle { 
-        font-family: 'Quicksand', sans-serif; 
-        font-size: 18px !important; 
-        color: #7F5539 !important; 
-        letter-spacing: 3px !important; 
-        text-transform: uppercase; 
-    }
-
-    .stButton>button { 
-        background: #B08968; 
-        color: #FFF1E6 !important; 
-        border-radius: 50px; 
-        border: none; 
-        padding: 18px; 
-        font-family: 'Quicksand', sans-serif; 
-        font-size: 20px; 
-        font-weight: bold; 
-        width: 100%; 
-        transition: 0.3s;
-    }
-    
-    .stButton>button:hover { background: #FDE2E4; color: #582F0E !important; border: 1px solid #582F0E; }
-    
-    /* Input Styling */
-    .stTextInput input, .stSelectbox div, .stTextArea textarea {
-        border-radius: 15px !important;
-        border: 1px solid #EAD2AC !important;
-    }
+    .radiant-title { font-family: 'Cormorant Garamond', serif; font-size: 60px !important; color: #582F0E !important; font-style: italic; }
+    .stButton>button { background: #B08968; color: #FFF1E6 !important; border-radius: 50px; border: none; padding: 15px; width: 100%; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Header Branding
-col_title, col_logo = st.columns([2, 1])
-with col_title:
-    st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
-    st.markdown('<p class="systems-subtitle">L OWENS SYSTEMS | Rewired for Purpose</p>', unsafe_allow_html=True)
+# 2. Header
+st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
+st.markdown('**L OWENS SYSTEMS** | *Rewired for Purpose*')
 
-with col_logo:
-    try:
-        logo = Image.open("logo.png")
-        st.image(logo, width=250) 
-    except:
-        st.write(" ") 
-
-# 3. Step 1: Customer Authentication
+# 3. STEP 1: Activation (The Gate)
 st.markdown("---")
 st.write("### 🔑 STEP 1: ACTIVATE YOUR STUDIO")
-customer_key = st.text_input("ENTER YOUR GOOGLE API KEY", type="password", help="Paste your key from Google AI Studio.")
+customer_key = st.text_input("ENTER YOUR GOOGLE API KEY", type="password")
 
 if not customer_key:
-    st.info("The Radiant Studio is locked. Please enter your API Key to access the editorial tools.")
-    st.stop()
+    st.info("Please enter your API Key to unlock the Radiant Studio.")
+    st.stop() # This hides everything below until the key is entered
 
-# 4. Identity & Direction
+# 4. STEP 2: Identity & Style (These were "missing")
 try:
     genai.configure(api_key=customer_key)
-    # Testing the key connection
-    test_model = genai.GenerativeModel('gemini-1.5-flash')
 except:
-    st.error("Authentication Failed. Please check your API Key.")
+    st.error("Invalid Key.")
     st.stop()
 
 st.write("### II. IDENTITY LOCK")
-uploaded_file = st.file_uploader("UPLOAD YOUR REFERENCE PHOTO", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("UPLOAD REFERENCE PHOTO", type=["jpg", "png", "jpeg"])
 
-# --- STEP 4: PRODUCTION ---
+st.markdown("---")
+st.write("### III. EDITORIAL DIRECTION")
+col1, col2 = st.columns(2)
+with col1:
+    style = st.selectbox("WARDROBE", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
+    shot_type = st.selectbox("COMPOSITION", ["Headshot", "Full Length", "Editorial Studio"])
+    output_count = st.selectbox("NUMBER OF OUTPUTS", [1, 2, 4])
+with col2:
+    hair = st.selectbox("STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View"])
+    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
+
+# 5. STEP 3: Production
 st.markdown("---")
 if st.button("PRODUCE MY RADIANT ASSETS"):
-    if uploaded_file is not None:
-        with st.status("Crafting Ultra-Realistic Render...", expanded=True) as status:
+    if uploaded_file:
+        with st.status("Crafting...", expanded=True) as status:
             try:
-                st.write("Initializing Production Engine...")
                 img_model = genai.ImageGenerationModel("imagen-3") 
+                prompt = f"ULTRA-REALISTIC. {style}, {shot_type}, {hair}, {theme}, {lighting}. High-end editorial."
                 
-                full_prompt = f"""
-                ULTRA-REALISTIC PHOTOGRAPHY. 8K resolution. RAW format.
-                Maintain 100% exact facial structure, skin tone, and features.
-                NO BEAUTIFICATION. NO SKIN SMOOTHING. SHOW NATURAL SKIN PORES.
-                EYES MUST BE VIVID AND LIFELIKE. Correct body proportions.
-                
-                STYLING:
-                - Clothing: {style}
-                - Shot: {shot_type}
-                - Hair: {hair}
-                - Lighting: {lighting}
-                - Background: {theme}
-                """
-                
-                st.write("Generating assets...")
                 response = img_model.generate_images(
-                    prompt=full_prompt,
+                    prompt=prompt,
                     number_of_images=output_count,
                     aspect_ratio="3:4",
                     person_generation="allow_adults"
                 )
                 
-                status.update(label="Assets Crafted!", state="complete", expanded=False)
-                
                 st.markdown("### YOUR RADIANT ASSETS")
                 cols = st.columns(2)
                 for i, result in enumerate(response.images):
                     cols[i % 2].image(result.image, use_container_width=True)
-                    
                     buf = io.BytesIO()
                     result.image.save(buf, format="PNG")
-                    st.download_button(f"Download Image {i+1}", buf.getvalue(), f"radiant_asset_{i+1}.png", "image/png", key=f"btn_{i}")
-
+                    st.download_button(f"Download {i+1}", buf.getvalue(), f"img_{i}.png", "image/png", key=f"dl_{i}")
+                status.update(label="Complete!", state="complete")
             except Exception as e:
-                st.error(f"Access Note: {e}")
-                st.info("Tip: Ensure your Google API Key has 'Imagen' permissions enabled.")
+                st.error(f"Note: {e}")
     else:
-        st.warning("Please upload a photo first.")
+        st.warning("Upload a photo first.")
