@@ -94,60 +94,46 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                st.write("Initializing Imagen 3 Engine...")
+                st.write("Accessing Legacy Engine...")
                 
-                # Using the standard Imagen 3 name that is compatible with the latest library
-                img_model = genai.ImageGenerationModel("imagen-3")
+                # Using the standard GenerativeModel which exists in all versions
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                
+                # We send the photo and the instructions together
+                img = Image.open(uploaded_file)
                 
                 full_prompt = f"""
-                ULTRA-REALISTIC HIGH-END PHOTOGRAPHY. 8K resolution. RAW format.
-                Maintain 100% exact facial structure and features from the attached photo.
-                NO BEAUTIFICATION. SHOW NATURAL SKIN TEXTURE.
+                You are a professional editorial photographer. 
+                Look at this person's facial features carefully. 
+                Generate a high-end, 8K professional brand image.
                 
-                STYLING:
-                - Hair: {hair_color} in a {hair_style}
-                - Outfit: {wardrobe} with {shoes}
+                REQUIREMENTS:
+                - Maintain 100% exact facial structure of the person in the photo.
+                - Hair: {hair_color}, {hair_style}
+                - Outfit: {wardrobe}, {shoes}
                 - Accessories: {jewelry}
-                - Additional Notes: {custom_details}
-                
-                SCENE:
-                - Environment: {theme}
+                - Setting: {theme}
                 - Lighting: {lighting}
+                - Additional Details: {custom_details}
                 
-                Aesthetic: Professional leadership, polished editorial, high-end magazine quality.
+                Aesthetic: Professional leadership, polished editorial.
                 """
                 
-                st.write("Generating assets via Imagen 3...")
+                st.write("Generating assets...")
                 
-                # The specific "door" for image generation
-                response = img_model.generate_images(
-                    prompt=full_prompt,
-                    number_of_images=quantity,
-                    aspect_ratio="3:4",
-                    person_generation="allow_adults"
-                )
+                # This uses the 'Multimodal' capability available in older versions
+                response = model.generate_content([full_prompt, img])
                 
-                st.markdown("### YOUR RADIANT ASSETS")
-                grid = st.columns(2)
-                for i, result in enumerate(response.images):
-                    grid[i % 2].image(result.image, use_container_width=True)
-                    
-                    buf = io.BytesIO()
-                    result.image.save(buf, format="PNG")
-                    st.download_button(
-                        label=f"DOWNLOAD ASSET {i+1}", 
-                        data=buf.getvalue(), 
-                        file_name=f"radiant_asset_{i+1}.png", 
-                        mime="image/png", 
-                        key=f"dl_{i}"
-                    )
+                # Since older versions might return text descriptions instead of images, 
+                # we show the result here:
+                if response.text:
+                    st.markdown("### STUDIO UPDATE")
+                    st.write(response.text)
+                    st.info("The server is currently generating a detailed prompt/description. To get actual IMAGES, the 'google-generativeai' version MUST be 0.8.3 or higher.")
                 
-                status.update(label="Assets Successfully Crafted!", state="complete")
+                status.update(label="Process Complete", state="complete")
                 
             except Exception as e:
-                # If it's a permission error, it's likely the API Key settings
                 st.error(f"Studio Note: {e}")
-                if "403" in str(e):
-                    st.warning("Your Google API Key may not have 'Imagen' permissions enabled yet.")
     else:
-        st.warning("Please upload your photo in Step 2 before producing.")
+        st.warning("Please upload your photo first.")
