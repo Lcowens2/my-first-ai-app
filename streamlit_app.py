@@ -135,19 +135,21 @@ st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
+            # The 'try' block starts here
             try:
                 st.write("Analyzing facial structure...")
+                
+                # Robust model check
                 try:
                     img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
-except AttributeError:
-    st.error("The Studio tools are still updating on the server. Please wait 60 seconds and refresh.")
-    st.stop()
+                except AttributeError:
+                    st.error("The Studio tools are still updating on the server. Please wait 60 seconds and refresh.")
+                    st.stop()
                 
-                # Building the prompt using all selections
                 full_prompt = f"""
                 ULTRA-REALISTIC HIGH-END PHOTOGRAPHY. 8K resolution.
                 Maintain 100% exact facial structure and features from the photo.
-                NO BEAUTIFICATION. Authentic skin texture.
+                NO BEAUTIFICATION. SHOW NATURAL SKIN TEXTURE.
                 
                 SUBJECT DETAILS:
                 - Hair: {hair_color} in a {hair_style}
@@ -177,15 +179,16 @@ except AttributeError:
                 for i, result in enumerate(response.images):
                     grid[i % 2].image(result.image, use_container_width=True)
                     
-                    # Buffer for download
                     buf = io.BytesIO()
                     result.image.save(buf, format="PNG")
                     st.download_button(f"DOWNLOAD ASSET {i+1}", buf.getvalue(), f"radiant_asset_{i}.png", "image/png", key=f"dl_{i}")
                 
                 status.update(label="Assets Successfully Crafted!", state="complete")
-                
+            
+            # This is the 'except' that matches the first 'try'
             except Exception as e:
                 st.error(f"Studio Note: {e}")
-                st.info("This usually means your key needs Image permissions or the prompt was too complex.")
+                st.info("Check your API key permissions or try a simpler custom description.")
     else:
+        st.warning("Please upload your photo in Step 2 before producing.")
         st.warning("Please upload your photo in Step 2 before producing.")
