@@ -35,13 +35,19 @@ st.markdown("""
 st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
 st.markdown('<p style="text-align: center; letter-spacing: 3px;">REWIRED FOR PURPOSE</p>', unsafe_allow_html=True)
 
-# 3. SETUP & KEY
-customer_key = st.text_input("ENTER STUDIO ACCESS KEY", type="password")
-if not customer_key:
-    st.info("Awaiting Studio Key...")
-    st.stop()
+# 3. PROMINENT LOGO & HEADER
+_, col_logo, _ = st.columns([1, 2, 1])
+with col_logo:
+    try:
+        # This looks for the file named 'logo.png' in your GitHub
+        logo = Image.open("logo.png")
+        st.image(logo, use_container_width=True) 
+    except:
+        # This is the backup if the file isn't found
+        st.markdown("<h1 style='text-align: center; color: #582F0E;'>L. OWENS</h1>", unsafe_allow_html=True)
 
-genai.configure(api_key=customer_key)
+st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; letter-spacing: 3px; color: #7F5539;">REWIRED FOR PURPOSE</p>', unsafe_allow_html=True)
 
 # 4. IDENTITY & EDITORIAL DIRECTION
 col1, col2 = st.columns(2)
