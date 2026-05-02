@@ -97,40 +97,20 @@ except:
 st.write("### II. IDENTITY LOCK")
 uploaded_file = st.file_uploader("UPLOAD YOUR REFERENCE PHOTO", type=["jpg", "png", "jpeg"])
 
-if uploaded_file:
-    st.image(uploaded_file, width=150, caption="Identity Locked")
-
+# --- STEP 4: PRODUCTION ---
 st.markdown("---")
-st.write("### III. EDITORIAL DIRECTION")
-col1, col2 = st.columns(2)
-with col1:
-    style = st.selectbox("WARDROBE", ["Tailored Business Suit (Cream/Peach)", "Executive Polished", "High-End Editorial"])
-    shot_type = st.selectbox("COMPOSITION", ["Headshot", "Full Length", "Editorial Studio"])
-    output_count = st.selectbox("NUMBER OF OUTPUTS", [1, 2, 4])
-with col2:
-    hair = st.selectbox("STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel"])
-    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
-
-# 5. The Production Line
 if st.button("PRODUCE MY RADIANT ASSETS"):
     if uploaded_file is not None:
         with st.status("Crafting Ultra-Realistic Render...", expanded=True) as status:
-            st.write("Analyzing facial structure and skin texture...")
-            
-            # 1. Initialize Models
-            # Note: Using Imagen-3 requires the key to have access to Google's image models
-           # Change this line in your main script:
-        img_model = genai.ImageGenerationModel("imagen-3")
-            
-                         
-                               
-                # Construct the prompt with strict identity and texture rules
+            try:
+                st.write("Initializing Production Engine...")
+                img_model = genai.ImageGenerationModel("imagen-3") 
+                
                 full_prompt = f"""
                 ULTRA-REALISTIC PHOTOGRAPHY. 8K resolution. RAW format.
                 Maintain 100% exact facial structure, skin tone, and features.
-                NO BEAUTIFICATION. NO SKIN SMOOTHING. SHOW NATURAL SKIN PORES and authentic texture.
-                EYES MUST BE VIVID AND LIFELIKE. Correct body proportions. NO LARGE HEADS.
+                NO BEAUTIFICATION. NO SKIN SMOOTHING. SHOW NATURAL SKIN PORES.
+                EYES MUST BE VIVID AND LIFELIKE. Correct body proportions.
                 
                 STYLING:
                 - Clothing: {style}
@@ -138,13 +118,9 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
                 - Hair: {hair}
                 - Lighting: {lighting}
                 - Background: {theme}
-                
-                Ensure the result looks like a high-end editorial magazine photo.
                 """
                 
                 st.write("Generating assets...")
-                
-                # Execute generation
                 response = img_model.generate_images(
                     prompt=full_prompt,
                     number_of_images=output_count,
@@ -154,7 +130,6 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
                 
                 status.update(label="Assets Crafted!", state="complete", expanded=False)
                 
-                # Display and Download Logic
                 st.markdown("### YOUR RADIANT ASSETS")
                 cols = st.columns(2)
                 for i, result in enumerate(response.images):
@@ -162,11 +137,10 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
                     
                     buf = io.BytesIO()
                     result.image.save(buf, format="PNG")
-                    st.download_button(f"Download Image {i+1}", buf.getvalue(), f"radiant_asset_{i+1}.png", "image/png")
+                    st.download_button(f"Download Image {i+1}", buf.getvalue(), f"radiant_asset_{i+1}.png", "image/png", key=f"btn_{i}")
 
             except Exception as e:
-                # Provides a graceful error message if the customer's key lacks permissions
                 st.error(f"Access Note: {e}")
-                st.info("Tip: Ensure your Google API Key has 'Imagen' permissions enabled in the Google Cloud Console.")
+                st.info("Tip: Ensure your Google API Key has 'Imagen' permissions enabled.")
     else:
         st.warning("Please upload a photo first.")
