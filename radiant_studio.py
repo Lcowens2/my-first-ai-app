@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 
-# --- THE ENGINE ROOM (Force the tools to update) ---
+# --- THE ENGINE ROOM ---
 try:
     import google.generativeai as genai
     if not hasattr(genai, 'ImageGenerationModel'):
@@ -72,12 +72,14 @@ st.markdown("---")
 st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
 col1, col2 = st.columns(2)
 with col1:
-    hair_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves"])
-    wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished"])
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel"])
+    hair_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey"])
+    hair_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo"])
+    wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial"])
+    shoes = st.selectbox("SHOES", ["Pumps", "Strappy Sandals", "Dressy Flats", "Classic Loafers"])
 with col2:
+    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot (Shoulders up)", "Mid-Shot (Waist up)", "Full Body Stand", "Seated Executive Pose"])
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Minimalist Studio Background"])
     lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
-    jewelry = st.text_input("JEWELRY PREFERENCE", placeholder="e.g. Gold hoops, Pearl necklace")
     quantity = st.selectbox("QUANTITY", [1, 2, 4])
 
 # 6. STEP 4: PRODUCTION
@@ -90,9 +92,13 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 
                 full_prompt = f"""
                 ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 
-                Maintain 100% exact facial structure of the person in the photo. 
-                Hair: {hair_style}. Outfit: {wardrobe}. Jewelry: {jewelry}.
-                Environment: {theme}. Lighting: {lighting}.
+                Maintain 100% exact facial structure and features of the person in the photo. 
+                Composition: {shot_style}.
+                Hair: {hair_color}, styled in a {hair_style}. 
+                Outfit: {wardrobe} with {shoes}. 
+                Environment: {theme}. 
+                Lighting: {lighting}.
+                Aesthetic: Polished, professional, and sophisticated.
                 """
                 
                 response = img_model.generate_images(
