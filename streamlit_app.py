@@ -120,7 +120,8 @@ if st.button("PRODUCE MY RADIANT ASSETS"):
             
             # 1. Initialize Models
             # Note: Using Imagen-3 requires the key to have access to Google's image models
-            img_model = genai.ImageGenerationModel("imagen-3.0-generate-001") 
+           # Change this line in your main script:
+        img_model = genai.ImageGenerationModel("imagen-3")
             
             # 2. Build the Ultra-Realistic Prompt
             full_prompt = f"""
