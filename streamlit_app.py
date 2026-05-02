@@ -138,7 +138,7 @@ if st.button("CREATE MY RADIANT ASSETS"):
             try:
                 st.write("Analyzing facial structure...")
                 try:
-    img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+                    img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
 except AttributeError:
     st.error("The Studio tools are still updating on the server. Please wait 60 seconds and refresh.")
     st.stop()
