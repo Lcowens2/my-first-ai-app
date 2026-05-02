@@ -1,22 +1,17 @@
-import os
-import sys
-import subprocess
-
-# --- THE ENGINE ROOM ---
-try:
-    import google.generativeai as genai
-    if not hasattr(genai, 'ImageGenerationModel'):
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "google-generativeai"])
-        import google.generativeai as genai
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-generativeai"])
-    import google.generativeai as genai
-
 import streamlit as st
 from PIL import Image
 import io
 
-# 1. PAGE CONFIGURATION & REWOUND RADIANT STYLING
+# 1. FORCE THE NEW LIBRARY (If the server is lagging)
+try:
+    from google import genai
+except ImportError:
+    import subprocess
+    import sys
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "google-genai"])
+    from google import genai
+
+# 2. RADIANT STYLING (The high-end editorial look)
 st.set_page_config(page_title="Radiant Image AI", layout="wide")
 st.markdown("""
     <style>
@@ -38,19 +33,18 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. LOGO SECTION
+# 3. BRANDING
 _, col_logo, _ = st.columns([1, 2, 1])
 with col_logo:
     try:
-        logo = Image.open("logo.png")
-        st.image(logo, use_container_width=True) 
+        st.image(Image.open("logo.png"), use_container_width=True)
     except:
         st.markdown("<h1 style='text-align: center; color: #582F0E;'>L. OWENS</h1>", unsafe_allow_html=True)
 
 st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
 st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_html=True)
 
-# 3. STEP 1: KEY ACTIVATION
+# 4. STEP 1: KEY ACTIVATION
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
 customer_key = st.text_input("PASTE YOUR UNIQUE STUDIO KEY HERE", type="password")
 
@@ -58,16 +52,17 @@ if not customer_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
 
-genai.configure(api_key=customer_key)
+# Initialize the NEW Google Client
+client = genai.Client(api_key=customer_key)
 
-# 4. STEP 2: IDENTITY LOCK
+# 5. STEP 2: IDENTITY LOCK
 st.markdown("---")
 st.write("### 📸 STEP 2: LOCK YOUR IDENTITY")
 uploaded_file = st.file_uploader("CHOOSE YOUR PHOTO", type=["jpg", "png", "jpeg"])
 if uploaded_file:
-    st.image(uploaded_file, width=250, caption="Identity Reference Locked")
+    st.image(uploaded_file, width=250, caption="Identity Locked")
 
-# 5. STEP 3: EDITORIAL DIRECTION
+# 6. STEP 3: EDITORIAL DIRECTION
 st.markdown("---")
 st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
 col1, col2 = st.columns(2)
@@ -77,43 +72,37 @@ with col1:
     wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial"])
     shoes = st.selectbox("SHOES", ["Pumps", "Strappy Sandals", "Dressy Flats", "Classic Loafers"])
 with col2:
-    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot (Shoulders up)", "Mid-Shot (Waist up)", "Full Body Stand", "Seated Executive Pose"])
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Minimalist Studio Background"])
+    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand"])
+    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background"])
     lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow"])
-    quantity = st.selectbox("QUANTITY", [1, 2, 4])
+    quantity = st.selectbox("QUANTITY", [1, 2])
 
-# 6. STEP 4: PRODUCTION
+# 7. STEP 4: PRODUCTION
 st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+                # NEW MAPPING for the new SDK
+                full_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {hair_color}, {hair_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 
-                full_prompt = f"""
-                ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 
-                Maintain 100% exact facial structure and features of the person in the photo. 
-                Composition: {shot_style}.
-                Hair: {hair_color}, styled in a {hair_style}. 
-                Outfit: {wardrobe} with {shoes}. 
-                Environment: {theme}. 
-                Lighting: {lighting}.
-                Aesthetic: Polished, professional, and sophisticated.
-                """
-                
-                response = img_model.generate_images(
+                # Using the NEW models.generate_image method
+                response = client.models.generate_image(
+                    model='imagen-3',
                     prompt=full_prompt,
-                    number_of_images=quantity,
-                    aspect_ratio="3:4",
-                    person_generation="allow_adults"
+                    config=genai.types.GenerateImageConfig(
+                        number_of_images=quantity,
+                        aspect_ratio="3:4",
+                        person_generation="allow_adults"
+                    )
                 )
                 
                 st.markdown("### YOUR RADIANT ASSETS")
-                grid = st.columns(2)
-                for i, result in enumerate(response.images):
-                    grid[i % 2].image(result.image, use_container_width=True)
+                for i, img_obj in enumerate(response.generated_images):
+                    st.image(img_obj.image, use_container_width=True)
+                    # Download logic
                     buf = io.BytesIO()
-                    result.image.save(buf, format="PNG")
+                    img_obj.image.save(buf, format="PNG")
                     st.download_button(f"DOWNLOAD ASSET {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}")
                 
                 status.update(label="Assets Successfully Crafted!", state="complete")
