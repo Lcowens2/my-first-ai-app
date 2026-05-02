@@ -137,7 +137,11 @@ if st.button("CREATE MY RADIANT ASSETS"):
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
                 st.write("Analyzing facial structure...")
-                img_model = genai.ImageGenerationModel("imagen-3") 
+                try:
+    img_model = genai.ImageGenerationModel("imagen-3.0-generate-001")
+except AttributeError:
+    st.error("The Studio tools are still updating on the server. Please wait 60 seconds and refresh.")
+    st.stop()
                 
                 # Building the prompt using all selections
                 full_prompt = f"""
