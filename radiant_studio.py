@@ -100,7 +100,7 @@ st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
-            try:
+            try:  # <--- The "Try" starts here
                 import requests
                 import json
                 import base64
@@ -112,8 +112,9 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 # 2. THE DIRECT REST API CALL
                 st.write("Connecting to Production Servers...")
                 
-             # The 2026 Standard for Paid Tier 1
-model_variants = ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "imagen-3.0-generate-001"]
+                # These must be indented exactly like this
+                model_variants = ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "imagen-3.0-generate-001"]
+                
                 success = False
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
@@ -150,10 +151,10 @@ model_variants = ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "image
 
                 if not success:
                     st.error("Studio Note: Access is not yet active for these models on this API Key.")
-                    st.info("Since your billing is active (Paid 1), please ensure this specific API Key was created INSIDE the 'Radiant Image AI' project.")
+                    st.info("Check: Is this key from the 'Radiant Image AI' project in AI Studio?")
 
-            except Exception as e:
+            except Exception as e:  # <--- This MUST line up vertically with "try"
                 st.error(f"Studio Error: {e}")
-                
+
     else:
         st.warning("Please upload a photo first.")
