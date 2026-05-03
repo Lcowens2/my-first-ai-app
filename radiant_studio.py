@@ -112,9 +112,8 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 # 2. THE DIRECT REST API CALL
                 st.write("Connecting to Production Servers...")
                 
-                # Updated list to prioritize the high-end Pro model for your Paid tier
-                model_variants = ["gemini-3-pro-image-preview", "gemini-2.5-flash-image", "imagen-3.0-generate-001"]
-                
+             # The 2026 Standard for Paid Tier 1
+model_variants = ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "imagen-3.0-generate-001"]
                 success = False
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
