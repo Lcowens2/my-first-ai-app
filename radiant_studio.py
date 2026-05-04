@@ -28,7 +28,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. THE DIRECT REST API CALL
-                st.write("Connecting to Production Servers...")
+st.write("Connecting to Production Servers...")
                 
                 # Priority list for a Paid 1 Tier account in 2026
                 model_variants = [
