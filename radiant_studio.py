@@ -31,7 +31,7 @@ st.markdown("""
 st.write("Connecting to Production Servers...")
                 
 # Priority list for a Paid 1 Tier account in 2026
- model_variants = [
+model_variants = [
      "gemini-2.5-flash-image", 
      "gemini-3-pro-image-preview", 
      "imagen-3.0-generate-001"
