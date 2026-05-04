@@ -27,7 +27,16 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. BRANDING SECTION
+# 2. THE DIRECT REST API CALL
+                st.write("Connecting to Production Servers...")
+                
+                # Priority list for a Paid 1 Tier account in 2026
+                model_variants = [
+                    "gemini-2.5-flash-image", 
+                    "gemini-3-pro-image-preview", 
+                    "imagen-3.0-generate-001"
+                ]
+# 2.BRANDING SECTION
 _, col_logo, _ = st.columns([1, 2, 1])
 with col_logo:
     try:
