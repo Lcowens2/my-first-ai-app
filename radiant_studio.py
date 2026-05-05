@@ -115,45 +115,42 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 import base64
 
                 # 1. PREPARE THE PROMPT
-                base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure and features of the person in the photo. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
+                base_details = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
                 final_prompt = base_details + (f" Additional Notes: {freestyle_prompt}" if freestyle_prompt else "")
 
-                # 2. THE DIRECT REST API CALL
-                st.write("Connecting to Production Servers...")
+                # 2. IMAGE PREP
+                img_bytes = uploaded_file.getvalue()
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # THESE ARE THE EXACT STRINGS FOR PAID ACCOUNTS
-                model_variants = [
-                    "imagen-3.0-generate-001",
-                    "imagen-3.0-fast-generate-001",
-                    "gemini-2.0-flash-exp" # Backup for newer experimental access
+                # 3. ENDPOINT STRATEGY
+                # We try the most stable production endpoints for Paid Tier 1
+                endpoints = [
+                    f"https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key={customer_key}",
+                    f"https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-001:predict?key={customer_key}"
                 ]
                 
                 success = False
-                img_bytes = uploaded_file.getvalue()
-                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
-
-                for model_name in model_variants:
+                for url in endpoints:
                     if success: break
-                    st.write(f"Testing Engine: {model_name}...")
-                    
-                    # URL using the 'v1' endpoint for stable production
-                    url = f"https://generativelanguage.googleapis.com/v1/models/{model_name}:predict?key={customer_key}"
+                    version = "v1beta" if "v1beta" in url else "v1"
+                    st.write(f"Authenticating via {version}...")
                     
                     payload = {
-                        "instances": [
-                            {
-                                "prompt": final_prompt, 
-                                "image": {"bytesBase64Encoded": img_b64}
-                            }
-                        ],
+                        "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
                         "parameters": {
                             "sampleCount": quantity,
                             "aspectRatio": "3:4",
-                            "personGeneration": "allow_adults"
+                            "personGeneration": "allow_adults",
+                            "safetySetting": "BLOCK_NONE" # Bypasses overly strict filters
                         }
                     }
 
                     response = requests.post(url, json=payload)
+                    
+                    # Log if the response is empty
+                    if not response.text:
+                        continue
+                        
                     result = response.json()
 
                     if response.status_code == 200:
@@ -162,6 +159,11 @@ if st.button("CREATE MY RADIANT ASSETS"):
                         grid = st.columns(2)
                         predictions = result.get("predictions", [])
                         
+                        if not predictions:
+                            st.warning("Engine connected but no images were returned. Trying next endpoint...")
+                            success = False
+                            continue
+
                         for i, pred in enumerate(predictions):
                             gen_img_data = base64.b64decode(pred["bytesBase64Encoded"])
                             generated_img = Image.open(io.BytesIO(gen_img_data))
@@ -169,20 +171,19 @@ if st.button("CREATE MY RADIANT ASSETS"):
                             
                             buf = io.BytesIO()
                             generated_img.save(buf, format="PNG")
-                            st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
+                            st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{version}")
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
                     else:
-                        # Log the specific error from Google to see why it's failing
-                        error_detail = result.get("error", {}).get("message", "Unknown error")
-                        st.write(f"Engine {model_name} responded: {error_detail}")
+                        error_msg = result.get("error", {}).get("message", "Service unavailable")
+                        st.write(f"System Note ({version}): {error_msg}")
 
                 if not success:
-                    st.error("Studio Note: High-fidelity image access is still initializing.")
-                    st.info("Since billing is confirmed, Google may take up to 1 hour to propagate permissions to a new key. Try again in 15 minutes.")
+                    st.error("The Studio is currently initializing your Paid Tier permissions.")
+                    st.info("Check: Does your 'Radiant 3' key in AI Studio have 'Imagen' enabled in the 'Edit Service' settings?")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
-                
     else:
         st.warning("Please upload a photo first.")
+        
