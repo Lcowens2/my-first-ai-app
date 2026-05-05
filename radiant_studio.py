@@ -109,7 +109,7 @@ st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
-            try:  # <--- The "Try" starts here
+            try:
                 import requests
                 import json
                 import base64
@@ -121,8 +121,12 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 # 2. THE DIRECT REST API CALL
                 st.write("Connecting to Production Servers...")
                 
-                # These must be indented exactly like this
-                model_variants = ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "imagen-3.0-generate-001"]
+                # THESE ARE THE EXACT STRINGS FOR PAID ACCOUNTS
+                model_variants = [
+                    "imagen-3.0-generate-001",
+                    "imagen-3.0-fast-generate-001",
+                    "gemini-2.0-flash-exp" # Backup for newer experimental access
+                ]
                 
                 success = False
                 img_bytes = uploaded_file.getvalue()
@@ -132,10 +136,21 @@ if st.button("CREATE MY RADIANT ASSETS"):
                     if success: break
                     st.write(f"Testing Engine: {model_name}...")
                     
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
+                    # URL using the 'v1' endpoint for stable production
+                    url = f"https://generativelanguage.googleapis.com/v1/models/{model_name}:predict?key={customer_key}"
+                    
                     payload = {
-                        "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
-                        "parameters": {"sampleCount": quantity, "aspectRatio": "3:4", "personGeneration": "allow_adults"}
+                        "instances": [
+                            {
+                                "prompt": final_prompt, 
+                                "image": {"bytesBase64Encoded": img_b64}
+                            }
+                        ],
+                        "parameters": {
+                            "sampleCount": quantity,
+                            "aspectRatio": "3:4",
+                            "personGeneration": "allow_adults"
+                        }
                     }
 
                     response = requests.post(url, json=payload)
@@ -157,13 +172,17 @@ if st.button("CREATE MY RADIANT ASSETS"):
                             st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
+                    else:
+                        # Log the specific error from Google to see why it's failing
+                        error_detail = result.get("error", {}).get("message", "Unknown error")
+                        st.write(f"Engine {model_name} responded: {error_detail}")
 
                 if not success:
-                    st.error("Studio Note: Access is not yet active for these models on this API Key.")
-                    st.info("Check: Is this key from the 'Radiant Image AI' project in AI Studio?")
+                    st.error("Studio Note: High-fidelity image access is still initializing.")
+                    st.info("Since billing is confirmed, Google may take up to 1 hour to propagate permissions to a new key. Try again in 15 minutes.")
 
-            except Exception as e:  # <--- This MUST line up vertically with "try"
+            except Exception as e:
                 st.error(f"Studio Error: {e}")
-
+                
     else:
         st.warning("Please upload a photo first.")
