@@ -30,12 +30,12 @@ st.markdown("""
 # 2. THE DIRECT REST API CALL
 st.write("Connecting to Production Servers...")
                 
-# These are the most stable "Direct" strings for May 2026
+# The absolute most stable strings for the Enabled Agent Platform
 model_variants = [
-                    "imagen-3", 
-                    "imagen-3.0-generate-001",
-                    "image-generation-006"
-                ]
+    "imagen-3.0-generate-001", 
+    "imagen-3", 
+    "image-generation-006"
+]
 # 2.BRANDING SECTION
 _, col_logo, _ = st.columns([1, 2, 1])
 with col_logo:
