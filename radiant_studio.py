@@ -31,7 +31,7 @@ st.markdown("""
 st.write("Connecting to Production Servers...")
                 
 # These are the most stable "Direct" strings for May 2026
-                model_variants = [
+model_variants = [
                     "imagen-3", 
                     "imagen-3.0-generate-001",
                     "image-generation-006"
