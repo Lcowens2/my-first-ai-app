@@ -27,28 +27,11 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. THE DIRECT REST API CALL
-st.write("Connecting to Production Servers...")
-                
-# The absolute most stable strings for the Enabled Agent Platform
-model_variants = [
-    "imagen-3.0-generate-001", 
-    "imagen-3", 
-    "image-generation-006"
-]
-# 2.BRANDING SECTION
-_, col_logo, _ = st.columns([1, 2, 1])
-with col_logo:
-    try:
-        st.image(Image.open("logo.png"), use_container_width=True)
-    except:
-        # Fallback if logo file is missing
-        st.markdown("<h1 style='text-align: center; color: #582F0E;'>L. OWENS</h1>", unsafe_allow_html=True)
-
+# 2. BRANDING SECTION
 st.markdown('<p class="radiant-title">Radiant Image AI</p>', unsafe_allow_html=True)
 st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_html=True)
 
-# 3. STEP 1: KEY ACTIVATION (Ensures client uses their own key)
+# 3. STEP 1: KEY ACTIVATION
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
 customer_key = st.text_input("PASTE YOUR UNIQUE STUDIO KEY HERE", type="password")
 if not customer_key:
@@ -69,95 +52,70 @@ col1, col2 = st.columns(2)
 
 with col1:
     h_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey", "Other..."])
-    if h_color == "Other...":
-        h_color = st.text_input("SPECIFY HAIR COLOR")
+    if h_color == "Other...": h_color = st.text_input("SPECIFY HAIR COLOR")
 
     h_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo", "Other..."])
-    if h_style == "Other...":
-        h_style = st.text_input("SPECIFY HAIR STYLE")
+    if h_style == "Other...": h_style = st.text_input("SPECIFY HAIR STYLE")
 
     wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial", "Other..."])
-    if wardrobe == "Other...":
-        wardrobe = st.text_input("SPECIFY WARDROBE")
-
-    shoes = st.selectbox("SHOES", ["Pumps", "Strappy Sandals", "Dressy Flats", "Classic Loafers", "Other..."])
-    if shoes == "Other...":
-        shoes = st.text_input("SPECIFY SHOES")
+    if wardrobe == "Other...": wardrobe = st.text_input("SPECIFY WARDROBE")
 
 with col2:
     shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand", "Other..."])
-    if shot_style == "Other...":
-        shot_style = st.text_input("SPECIFY SHOT STYLE")
+    if shot_style == "Other...": shot_style = st.text_input("SPECIFY SHOT STYLE")
 
     theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background", "Other..."])
-    if theme == "Other...":
-        theme = st.text_input("SPECIFY ENVIRONMENT")
+    if theme == "Other...": theme = st.text_input("SPECIFY ENVIRONMENT")
 
     lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow", "Other..."])
-    if lighting == "Other...":
-        lighting = st.text_input("SPECIFY LIGHTING")
+    if lighting == "Other...": lighting = st.text_input("SPECIFY LIGHTING")
 
     quantity = st.selectbox("QUANTITY", [1, 2, 4])
 
-# 6. STEP 4: FREESTYLE STUDIO
+# 6. STEP 4: FREESTYLE STUDIO (THE BYPASS)
 st.markdown("---")
-st.write("### ✍️ STEP 4: FREESTYLE STUDIO (OPTIONAL)")
-freestyle_prompt = st.text_area("INJECT YOUR OWN CUSTOM PROMPT DETAILS", placeholder="e.g. 'I want to be holding a professional camera'...")
+st.write("### ✍️ STEP 4: FREESTYLE STUDIO")
+st.caption("Note: Entering text here will bypass all dropdown selections above.")
+freestyle_prompt = st.text_area("INJECT YOUR CUSTOM PROMPT HERE", placeholder="e.g. Standing on a stage, holding a microphone, speaking to an audience...")
 
-# 8. PRODUCTION ENGINE
+# 7. PRODUCTION ENGINE
 st.markdown("---")
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                import requests
-                import json
-                import base64
-
-                # 1. THE BYPASS LOGIC
-                # If Freestyle has text, it IGNORES the dropdowns entirely.
+                # BYPASS LOGIC: If freestyle has text, ignore dropdowns
                 if freestyle_prompt.strip():
-                    st.write("🚀 Freestyle Mode Active: Using custom prompt only.")
+                    st.write("🚀 Freestyle Mode Active: Bypassing dropdowns.")
                     final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. {freestyle_prompt}"
                 else:
-                    # If Freestyle is empty, it uses the dropdown selections.
                     st.write("📋 Menu Mode Active: Using dropdown selections.")
-                    final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}, {shoes}. Environment: {theme}. Lighting: {lighting}."
+                    final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}. Environment: {theme}. Lighting: {lighting}."
 
-                # 2. IMAGE PREP
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # 3. ENDPOINT & PRODUCTION
+                # 2026 Production Strings
                 model_variants = ["imagen-3.0-generate-001", "imagen-3", "image-generation-006"]
                 
                 success = False
                 for model_name in model_variants:
                     if success: break
-                    st.write(f"Testing Engine: {model_name}...")
+                    st.write(f"Connecting to Engine: {model_name}...")
                     
-                    # Using the v1beta endpoint which is often more compatible with newly enabled projects
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
-                    
                     payload = {
                         "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
-                        "parameters": {
-                            "sampleCount": quantity,
-                            "aspectRatio": "3:4",
-                            "personGeneration": "allow_adults",
-                            "safetySetting": "BLOCK_NONE"
-                        }
+                        "parameters": {"sampleCount": quantity, "aspectRatio": "3:4", "personGeneration": "allow_adults", "safetySetting": "BLOCK_NONE"}
                     }
 
                     response = requests.post(url, json=payload)
-                    
                     if response.status_code == 200:
                         result = response.json()
                         success = True
                         st.markdown("### YOUR RADIANT ASSETS")
                         grid = st.columns(2)
                         predictions = result.get("predictions", [])
-                        
                         for i, pred in enumerate(predictions):
                             gen_img_data = base64.b64decode(pred["bytesBase64Encoded"])
                             generated_img = Image.open(io.BytesIO(gen_img_data))
@@ -166,16 +124,14 @@ if st.button("CREATE MY RADIANT ASSETS"):
                             buf = io.BytesIO()
                             generated_img.save(buf, format="PNG")
                             st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
-                        
                         status.update(label="Assets Successfully Crafted!", state="complete")
-                    else:
-                        st.write(f"Engine {model_name} still initializing...")
-
+                
                 if not success:
-                    st.error("The Studio is still syncing your permissions.")
-                    st.info("Since your API is now 'Enabled', this usually clears within 10-15 minutes.")
+                    st.error("Studio Note: Access is still initializing.")
+                    st.info("Check: Is the 'Agent Platform API' enabled for this project?")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
     else:
         st.warning("Please upload a photo first.")
+        
