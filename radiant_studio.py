@@ -38,7 +38,7 @@ if not raw_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
 
-# Auto-strip any accidental spaces or hidden newlines from copy-paste
+# Cleans accidental spaces from copy-pasting
 customer_key = raw_key.strip()
 
 # 4. STEP 2: IDENTITY LOCK (UPLOAD PHOTO)
@@ -54,8 +54,7 @@ st.write("### ✍️ STEP 3: CUSTOM VISION (OPTIONAL)")
 st.caption("Note: Typing here will automatically hide the standard menu options below.")
 freestyle_prompt = st.text_area("INJECT YOUR CUSTOM PROMPT HERE", placeholder="e.g. Standing on a luxury balcony overlooking the Mediterranean...")
 
-# 6. STEP 4: EDITORIAL DIRECTION (CONDITIONAL DISPLAY)
-# These variables must exist even if the menu is hidden
+# 6. STEP 4: EDITORIAL DIRECTION (HIDES IF FREESTYLE IS USED)
 h_color = h_style = wardrobe = shot_style = theme = lighting = ""
 
 if not freestyle_prompt.strip():
@@ -94,7 +93,7 @@ if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # BYPASS LOGIC
+                # PROMPT LOGIC
                 if freestyle_prompt.strip():
                     final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. {freestyle_prompt}"
                 else:
@@ -103,15 +102,14 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # Try v1 first (Stable), then v1beta (Experimental)
+                # 2026 Production Strategy: Targeting the Paid-Tier Imagen 3
                 api_versions = ["v1", "v1beta"]
-              # Change this line in Section 8:
-              model_name = "imagen-3.0-generate-001"
+                model_name = "imagen-3.0-generate-001"
                 
                 success = False
                 for version in api_versions:
                     if success: break
-                    st.write(f"Attempting connection via {version}...")
+                    st.write(f"Connecting to Engine via {version}...")
                     
                     url = f"https://generativelanguage.googleapis.com/{version}/models/{model_name}:predict?key={customer_key}"
                     payload = {
@@ -139,15 +137,16 @@ if st.button("CREATE MY RADIANT ASSETS"):
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
                     else:
+                        # Log error details if version fails
                         try:
-                            error_detail = response.json().get("error", {}).get("message", "Unknown error")
-                        except Exception:
-                            error_detail = response.text
-                        st.write(f"Note ({version}): {error_detail}")
+                            error_info = response.json().get("error", {}).get("message", "Unknown error")
+                        except:
+                            error_info = response.text
+                        st.write(f"Note ({version}): {error_info}")
 
                 if not success:
                     st.error("The Studio is still verifying your high-fidelity access.")
-                    st.info("Since billing is active, this error usually clears once you have made your first $10 'credit' purchase in AI Studio Billing.")
+                    st.info("Since your $10 credit is added, this is just a final sync delay. Try again in 5-10 minutes!")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
