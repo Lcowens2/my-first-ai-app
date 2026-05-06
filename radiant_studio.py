@@ -100,21 +100,23 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # 2026 Stable Models
-                model_variants = ["imagen-3.0-generate-001", "imagen-3", "image-generation-006"]
+                # 2026 Production Strategy: Try v1 first (Stable), then v1beta (Experimental)
+                api_versions = ["v1", "v1beta"]
+                model_name = "imagen-3.0-generate-001"
                 
                 success = False
-                for model_name in model_variants:
+                for version in api_versions:
                     if success: break
-                    st.write(f"Connecting to Engine: {model_name}...")
+                    st.write(f"Attempting connection via {version}...")
                     
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:predict?key={customer_key}"
+                    url = f"https://generativelanguage.googleapis.com/{version}/models/{model_name}:predict?key={customer_key}"
                     payload = {
                         "instances": [{"prompt": final_prompt, "image": {"bytesBase64Encoded": img_b64}}],
                         "parameters": {"sampleCount": quantity, "aspectRatio": "3:4", "personGeneration": "allow_adults", "safetySetting": "BLOCK_NONE"}
                     }
 
                     response = requests.post(url, json=payload)
+                    
                     if response.status_code == 200:
                         result = response.json()
                         success = True
@@ -127,16 +129,19 @@ if st.button("CREATE MY RADIANT ASSETS"):
                             generated_img = Image.open(io.BytesIO(gen_img_data))
                             grid[i % 2].image(generated_img, use_container_width=True)
                             
-                            # Standard save logic using the 'io' import
                             buf = io.BytesIO()
                             generated_img.save(buf, format="PNG")
-                            st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
+                            st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{version}")
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
-                
+                    else:
+                        # Log the error so we can see why a version failed
+                        error_detail = response.json().get("error", {}).get("message", "Unknown error")
+                        st.write(f"Note ({version}): {error_detail}")
+
                 if not success:
-                    st.error("Studio Note: Engine is still warming up.")
-                    st.info("Check: Have you clicked 'Enable' on the Agent Platform API in Google Cloud Console?")
+                    st.error("The Studio is still verifying your high-fidelity access.")
+                    st.info("Since billing is active, this 403 usually clears once you have made your first $10 'credit' purchase in AI Studio Billing.")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
