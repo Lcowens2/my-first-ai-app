@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-import io            # <--- ADD THIS LINE
+import io
 import requests
 import json
 import base64
@@ -33,69 +33,74 @@ st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_
 
 # 3. STEP 1: KEY ACTIVATION
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
-customer_key = st.text_input("PASTE YOUR UNIQUE STUDIO KEY HERE", type="password")
+customer_key = st.text_input("ENTER YOUR RADIANT ACTIVATION KEY", type="password")
 if not customer_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
 
-# 4. STEP 2: IDENTITY LOCK
+# 4. STEP 2: IDENTITY LOCK (UPLOAD PHOTO)
 st.markdown("---")
 st.write("### 📸 STEP 2: LOCK YOUR IDENTITY")
-uploaded_file = st.file_uploader("CHOOSE YOUR PHOTO", type=["jpg", "png", "jpeg"])
+uploaded_file = st.file_uploader("CHOOSE YOUR REFERENCE PHOTO", type=["jpg", "png", "jpeg"])
 if uploaded_file:
     st.image(uploaded_file, width=250, caption="Identity Reference Locked")
 
-# 5. STEP 3: EDITORIAL DIRECTION
+# 5. STEP 3: FREESTYLE STUDIO (THE BYPASS MASTER)
 st.markdown("---")
-st.write("### ✨ STEP 3: DEFINE YOUR LOOK")
-col1, col2 = st.columns(2)
+st.write("### ✍️ STEP 3: CUSTOM VISION (OPTIONAL)")
+st.caption("Note: Typing here will automatically hide the standard menu options below.")
+freestyle_prompt = st.text_area("INJECT YOUR CUSTOM PROMPT HERE", placeholder="e.g. Standing on a luxury balcony overlooking the Mediterranean...")
 
-with col1:
-    h_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey", "Other..."])
-    if h_color == "Other...": h_color = st.text_input("SPECIFY HAIR COLOR")
+# 6. STEP 4: EDITORIAL DIRECTION (CONDITIONAL DISPLAY)
+# These variables must exist even if the menu is hidden
+h_color = h_style = wardrobe = shot_style = theme = lighting = ""
 
-    h_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo", "Other..."])
-    if h_style == "Other...": h_style = st.text_input("SPECIFY HAIR STYLE")
+if not freestyle_prompt.strip():
+    st.markdown("---")
+    st.write("### ✨ STEP 4: DEFINE YOUR LOOK (MENU MODE)")
+    col1, col2 = st.columns(2)
 
-    wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial", "Other..."])
-    if wardrobe == "Other...": wardrobe = st.text_input("SPECIFY WARDROBE")
+    with col1:
+        h_color = st.selectbox("HAIR COLOR", ["Dark Brown", "Black", "Dark Blonde", "Light Blonde", "Auburn", "Silver/Grey", "Other..."])
+        if h_color == "Other...": h_color = st.text_input("SPECIFY HAIR COLOR")
 
-with col2:
-    shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand", "Other..."])
-    if shot_style == "Other...": shot_style = st.text_input("SPECIFY SHOT STYLE")
+        h_style = st.selectbox("HAIR STYLING", ["Sleek Bun", "Naturally Curly", "Sleek Bob", "Hollywood Waves", "Braided Updo", "Other..."])
+        if h_style == "Other...": h_style = st.text_input("SPECIFY HAIR STYLE")
 
-    theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background", "Other..."])
-    if theme == "Other...": theme = st.text_input("SPECIFY ENVIRONMENT")
+        wardrobe = st.selectbox("WARDROBE", ["Business Casual", "Pantsuit", "Tailored Business Suit", "Executive Polished", "High-End Editorial", "Other..."])
+        if wardrobe == "Other...": wardrobe = st.text_input("SPECIFY WARDROBE")
 
-    lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow", "Other..."])
-    if lighting == "Other...": lighting = st.text_input("SPECIFY LIGHTING")
+    with col2:
+        shot_style = st.selectbox("SHOT COMPOSITION", ["Professional Headshot", "Mid-Shot (Waist up)", "Full Body Stand", "Other..."])
+        if shot_style == "Other...": shot_style = st.text_input("SPECIFY SHOT STYLE")
 
-    quantity = st.selectbox("QUANTITY", [1, 2, 4])
+        theme = st.selectbox("ENVIRONMENT", ["Modern Office", "Luxury Yacht", "Penthouse View", "High-End Hotel", "Studio Background", "Other..."])
+        if theme == "Other...": theme = st.text_input("SPECIFY ENVIRONMENT")
 
-# 6. STEP 4: FREESTYLE STUDIO (THE BYPASS)
+        lighting = st.selectbox("LIGHTING", ["Golden Hour", "Studio Softbox", "Cinematic Glow", "Other..."])
+        if lighting == "Other...": lighting = st.text_input("SPECIFY LIGHTING")
+else:
+    st.success("🎯 Radiant Bypass Active: Studio is now prioritizing your custom vision.")
+
+# 7. PRODUCTION SETTINGS
 st.markdown("---")
-st.write("### ✍️ STEP 4: FREESTYLE STUDIO")
-st.caption("Note: Entering text here will bypass all dropdown selections above.")
-freestyle_prompt = st.text_area("INJECT YOUR CUSTOM PROMPT HERE", placeholder="e.g. Standing on a stage, holding a microphone, speaking to an audience...")
+quantity = st.selectbox("QUANTITY OF ASSETS", [1, 2, 4])
 
-# 7. PRODUCTION ENGINE
-st.markdown("---")
+# 8. PRODUCTION ENGINE
 if st.button("CREATE MY RADIANT ASSETS"):
     if uploaded_file:
         with st.status("Crafting your professional assets...", expanded=True) as status:
             try:
-                # BYPASS LOGIC: If freestyle has text, ignore dropdowns
+                # BYPASS LOGIC
                 if freestyle_prompt.strip():
-                    st.write("🚀 Freestyle Mode Active: Bypassing dropdowns.")
                     final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. {freestyle_prompt}"
                 else:
-                    st.write("📋 Menu Mode Active: Using dropdown selections.")
                     final_prompt = f"ULTRA-REALISTIC 8K PHOTOGRAPHY. High-end leadership editorial style. 100% exact facial structure. Composition: {shot_style}. Hair: {h_color}, {h_style}. Outfit: {wardrobe}. Environment: {theme}. Lighting: {lighting}."
 
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # 2026 Production Strings
+                # 2026 Stable Models
                 model_variants = ["imagen-3.0-generate-001", "imagen-3", "image-generation-006"]
                 
                 success = False
@@ -116,22 +121,24 @@ if st.button("CREATE MY RADIANT ASSETS"):
                         st.markdown("### YOUR RADIANT ASSETS")
                         grid = st.columns(2)
                         predictions = result.get("predictions", [])
+                        
                         for i, pred in enumerate(predictions):
                             gen_img_data = base64.b64decode(pred["bytesBase64Encoded"])
                             generated_img = Image.open(io.BytesIO(gen_img_data))
                             grid[i % 2].image(generated_img, use_container_width=True)
                             
+                            # Standard save logic using the 'io' import
                             buf = io.BytesIO()
                             generated_img.save(buf, format="PNG")
                             st.download_button(f"DOWNLOAD {i+1}", buf.getvalue(), f"radiant_{i+1}.png", "image/png", key=f"dl_{i}_{model_name}")
+                        
                         status.update(label="Assets Successfully Crafted!", state="complete")
                 
                 if not success:
-                    st.error("Studio Note: Access is still initializing.")
-                    st.info("Check: Is the 'Agent Platform API' enabled for this project?")
+                    st.error("Studio Note: Engine is still warming up.")
+                    st.info("Check: Have you clicked 'Enable' on the Agent Platform API in Google Cloud Console?")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
     else:
         st.warning("Please upload a photo first.")
-        
