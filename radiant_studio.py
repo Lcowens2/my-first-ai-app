@@ -105,7 +105,8 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 
                 # Try v1 first (Stable), then v1beta (Experimental)
                 api_versions = ["v1", "v1beta"]
-                model_name = "imagen-3.0-generate-002"  # Standard high-quality Imagen 3 model string
+              # Change this line in Section 8:
+              model_name = "imagen-3.0-generate-001"
                 
                 success = False
                 for version in api_versions:
