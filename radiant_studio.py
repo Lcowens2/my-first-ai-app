@@ -33,10 +33,13 @@ st.markdown('<p class="systems-subtitle">Rewired for Purpose</p>', unsafe_allow_
 
 # 3. STEP 1: KEY ACTIVATION
 st.write("### 💎 STEP 1: ACTIVATE YOUR SESSION")
-customer_key = st.text_input("ENTER YOUR RADIANT ACTIVATION KEY", type="password")
-if not customer_key:
+raw_key = st.text_input("ENTER YOUR RADIANT ACTIVATION KEY", type="password")
+if not raw_key:
     st.info("Awaiting your professional key to unlock the studio...")
     st.stop()
+
+# Auto-strip any accidental spaces or hidden newlines from copy-paste
+customer_key = raw_key.strip()
 
 # 4. STEP 2: IDENTITY LOCK (UPLOAD PHOTO)
 st.markdown("---")
@@ -100,9 +103,9 @@ if st.button("CREATE MY RADIANT ASSETS"):
                 img_bytes = uploaded_file.getvalue()
                 img_b64 = base64.b64encode(img_bytes).decode('utf-8')
                 
-                # 2026 Production Strategy: Try v1 first (Stable), then v1beta (Experimental)
+                # Try v1 first (Stable), then v1beta (Experimental)
                 api_versions = ["v1", "v1beta"]
-                model_name = "imagen-3.0-generate-001"
+                model_name = "imagen-3.0-generate-002"  # Standard high-quality Imagen 3 model string
                 
                 success = False
                 for version in api_versions:
@@ -135,13 +138,15 @@ if st.button("CREATE MY RADIANT ASSETS"):
                         
                         status.update(label="Assets Successfully Crafted!", state="complete")
                     else:
-                        # Log the error so we can see why a version failed
-                        error_detail = response.json().get("error", {}).get("message", "Unknown error")
+                        try:
+                            error_detail = response.json().get("error", {}).get("message", "Unknown error")
+                        except Exception:
+                            error_detail = response.text
                         st.write(f"Note ({version}): {error_detail}")
 
                 if not success:
                     st.error("The Studio is still verifying your high-fidelity access.")
-                    st.info("Since billing is active, this 403 usually clears once you have made your first $10 'credit' purchase in AI Studio Billing.")
+                    st.info("Since billing is active, this error usually clears once you have made your first $10 'credit' purchase in AI Studio Billing.")
 
             except Exception as e:
                 st.error(f"Studio Error: {e}")
